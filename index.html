@@ -234,6 +234,18 @@ footer a{color:var(--ink)}
 .drag.dragging .drag-handle{cursor:grabbing}
 .receipt-col.drag .tape-head{border-top:0}
 .stand.free .receipt-note{display:none}
+
+/* ---------- collapsible windows ---------- */
+.colbtn{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:40px;min-height:34px;padding:0;z-index:2}
+.colbtn:active{transform:translateY(calc(-50% + 1px))}
+.colbtn svg{width:14px;height:14px;transition:transform .15s steps(2)}
+.collapsed .colbtn svg{transform:rotate(-90deg)}
+.plank h2{padding-right:52px}
+.tape-head{position:relative;padding-right:56px;padding-left:56px}
+.win.collapsed > :not(.plank){display:none!important}
+.win.collapsed > .plank{border-bottom:0}
+.receipt-col.collapsed .tape,.receipt-col.collapsed .tape-foot,.receipt-col.collapsed .receipt-note{display:none}
+.receipt-col.collapsed .tape-head{border-bottom:0;padding-bottom:14px}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 <style>html,body{margin:0}</style>
@@ -266,6 +278,7 @@ footer a{color:var(--ink)}
     <p class="lede">Put your sellables in the bag. The gralat total carries over to the counter, and every trade prints on the receipt, ready to paste into chat.</p>
     <div class="layout-tools">
       <span class="drag-hint"><span class="grip" aria-hidden="true"></span> Drag any window by its wooden title bar</span>
+      <button class="btn" id="collapseAll" type="button">Collapse all</button>
       <button class="btn" id="resetLayout" type="button" hidden>Reset layout</button>
     </div>
   </div>
@@ -778,6 +791,42 @@ if ("ResizeObserver" in window) { const ro = new ResizeObserver(() => { if (curr
 mqWide.addEventListener("change", () => { if (mqWide.matches) applyFree(); else exitFree(); });
 let rsT; window.addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => { if (mqWide.matches) applyFree(); }, 120); });
 byId("resetLayout").onclick = () => { S.layout = null; save(); applyFree(); toast("Windows back in place"); };
+
+
+/* ---------- collapsible windows ---------- */
+const COL_IDS = ["winBag","convG","convR","winReceipt"];
+const COL_NAMES = {winBag:"Inventory Bag", convG:"Gralats to Tro", convR:"Rocks to Tro", winReceipt:"Trade Receipt"};
+S.collapsed = S.collapsed || {};
+const chevSvg = '<svg viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M1 3h8v1H1zM2 4h6v1H2zM3 5h4v1H3zM4 6h2v1H4z"/></svg>';
+function relayout(){ if (current && !S.layout) applyFree(); else if (current) standH(); }
+function syncCollapseAll(){
+  const allClosed = COL_IDS.every(id => byId(id).classList.contains("collapsed"));
+  byId("collapseAll").textContent = allClosed ? "Expand all" : "Collapse all";
+}
+function setCol(id, on){
+  const el = byId(id); el.classList.toggle("collapsed", on);
+  const b = el.querySelector(".colbtn");
+  b.setAttribute("aria-expanded", String(!on));
+  b.setAttribute("aria-label", (on ? "Expand " : "Collapse ") + COL_NAMES[id]);
+  b.title = on ? "Expand" : "Collapse";
+  S.collapsed[id] = on;
+}
+COL_IDS.forEach(id => {
+  const el = byId(id), handle = el.querySelector(".plank, .tape-head");
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "btn colbtn"; b.innerHTML = chevSvg;
+  b.addEventListener("click", e => { e.stopPropagation(); setCol(id, !el.classList.contains("collapsed")); save(); relayout(); syncCollapseAll(); });
+  handle.appendChild(b);
+  setCol(id, !!S.collapsed[id]);
+});
+byId("collapseAll").onclick = () => {
+  const close = !COL_IDS.every(id => byId(id).classList.contains("collapsed"));
+  COL_IDS.forEach(id => setCol(id, close));
+  if (close) byId("abacus").open = false;
+  save(); relayout(); syncCollapseAll();
+};
+byId("abacus").addEventListener("toggle", () => relayout());
+syncCollapseAll();
 
 /* ---------- boot ---------- */
 buildShelf();
