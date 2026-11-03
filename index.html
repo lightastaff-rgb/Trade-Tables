@@ -645,10 +645,65 @@ $("#abacus").addEventListener("toggle", () => { if ($("#abacus").open) $("#calc"
 calcDraw();
 
 /* ---------- screenshot reading (asks Claude) ---------- */
-let sample = null;
+let sample = null, remote = false;
+// Screenshot reader hosted on the Lovable project (used when the page isn't running inside Claude).
+const READER_URL = "https://gmakxiykchiuygzwffel.supabase.co/functions/v1/read-inventory";
+const READER_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYWt4aXlrY2hpdXlnendmZmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDUxNTIsImV4cCI6MjA4ODk4MTE1Mn0.eTfbpxE1fiWmJrjQrY3UaKzXh9sdDroGH03mf_4fSCY";
+function fileToDataUrl(file){
+  return new Promise((res, rej) => {
+    const big = file.size > 3.5 * 1024 * 1024;
+    const fr = new FileReader();
+    fr.onerror = () => rej(new Error("read"));
+    fr.onload = () => {
+      if (!big) return res(fr.result);
+      const img = new Image();
+      img.onload = () => {
+        const s = Math.min(1, 1800 / Math.max(img.width, img.height));
+        const c = document.createElement("canvas"); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", .9));
+      };
+      img.onerror = () => rej(new Error("decode"));
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+function fillFromCounts(get){
+  let found = 0;
+  ITEMS.forEach(it => {
+    const v = Math.round(Number(get(it.name)));
+    if (Number.isFinite(v) && v > 0) { S.qty[it.id] = String(v); found++; } else S.qty[it.id] = "";
+    $("#q-" + it.id).value = S.qty[it.id];
+  });
+  refreshBag(true);
+  shotStatus(found ? `Filled in ${found} item${found > 1 ? "s" : ""} from your screenshot. Give the counts a quick check.` : "No sellables found in that picture.");
+}
+async function readShotRemote(file){
+  const btn = $("#shotBtn"); btn.disabled = true; shotStatus("Reading your screenshot…");
+  try {
+    const image = await fileToDataUrl(file);
+    const r = await fetch(READER_URL, {method:"POST", headers:{"Content-Type":"application/json", "apikey":READER_KEY, "Authorization":"Bearer " + READER_KEY}, body:JSON.stringify({image})});
+    let data = {}; try { data = await r.json(); } catch (_) {}
+    if (!r.ok || data.error) {
+      if (r.status === 429) shotStatus("Too many reads right now. Try again in a minute.", true);
+      else if (r.status === 402) shotStatus("The screenshot reader is out of credits. Type your counts in for now.", true);
+      else shotStatus(data.error || "Couldn't read that picture. Try again.", true);
+      return;
+    }
+    const counts = data.counts || {};
+    fillFromCounts(n => counts[n]);
+  } catch (e) {
+    shotStatus("Couldn't reach the screenshot reader. Check your connection and try again.", true);
+  } finally { btn.disabled = false; $("#shotFile").value = ""; }
+}
 const shotStatus = (msg, err) => { const s = $("#shotStatus"); s.textContent = msg; s.classList.toggle("err", !!err); };
 async function readShot(file){
-  if (!sample || !file) return;
+  if (!file) return;
+  if (!sample) {
+    if (!remote) return;
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { shotStatus("Use a PNG, JPEG or WEBP picture.", true); return; }
+    return readShotRemote(file);
+  }
   if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) { shotStatus("Use a PNG, JPEG or WEBP picture.", true); return; }
   const btn = $("#shotBtn"); btn.disabled = true; shotStatus("Reading your screenshot…");
   const names = ITEMS.map(i => i.name);
@@ -665,14 +720,7 @@ Rules:
 Reply with only one JSON object whose keys are exactly the item names above and whose values are whole numbers.`;
   try {
     const res = await sample.json(prompt, {images:[file]});
-    let found = 0;
-    ITEMS.forEach(it => {
-      const v = Math.round(Number(res && res[it.name]));
-      if (Number.isFinite(v) && v > 0) { S.qty[it.id] = String(v); found++; } else S.qty[it.id] = "";
-      $("#q-" + it.id).value = S.qty[it.id];
-    });
-    refreshBag(true);
-    shotStatus(found ? `Filled in ${found} item${found > 1 ? "s" : ""} from your screenshot. Give the counts a quick check.` : "No sellables found in that picture.");
+    fillFromCounts(n => res && res[n]);
   } catch (e) {
     const code = e && e.code;
     if (code === "not_granted" || code === "sampling_disabled" || code === "images_unavailable" || code === "not_declared" || code === "capability_disabled" || code === "capability_removed") {
@@ -686,20 +734,21 @@ Reply with only one JSON object whose keys are exactly the item names above and 
 $("#shotBtn").onclick = () => $("#shotFile").click();
 $("#shotFile").onchange = e => readShot(e.target.files && e.target.files[0]);
 document.addEventListener("paste", e => {
-  if (!sample || $("#shotBtn").hidden) return;
+  if ((!sample && !remote) || $("#shotBtn").hidden) return;
   if (e.target.closest && e.target.closest("#calc")) return;
   const f = [...(e.clipboardData ? e.clipboardData.files : [])].find(f => f.type.startsWith("image/"));
   if (f) { e.preventDefault(); readShot(f); }
 });
+function useRemoteReader(){ if (sample) return; remote = true; $("#shotBtn").hidden = false; $("#shotFile").accept = "image/png,image/jpeg,image/webp"; }
 (async () => {
   try {
-    if (!window.claude || !claude.use) return;
-    const s = await claude.use("sample"); if (!s) return;
+    if (!window.claude || !claude.use) { useRemoteReader(); return; }
+    const s = await claude.use("sample"); if (!s) { useRemoteReader(); return; }
     const lim = await s.limits().catch(() => null);
-    if (!lim || !lim.images) return;
+    if (!lim || !lim.images) { useRemoteReader(); return; }
     sample = s; $("#shotBtn").hidden = false;
     $("#shotFile").accept = lim.images.mediaTypes.join(",");
-  } catch (e) {}
+  } catch (e) { useRemoteReader(); }
 })();
 
 
