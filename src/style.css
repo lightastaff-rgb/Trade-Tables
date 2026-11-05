@@ -68,7 +68,7 @@ img{image-rendering:pixelated}
   padding:6px 18px 6px;clip-path:polygon(0 0,100% 0,calc(100% - 8px) 50%,100% 100%,0 100%,8px 50%);box-shadow:inset 0 -3px 0 rgba(0,0,0,.15)}
 
 /* ---------- header scene ---------- */
-.town{background:#219418 url("../assets/ui/scene.png") repeat-x 50% 100%/1024px 224px;border-bottom:4px solid #2B180C;min-height:224px;display:flex;align-items:flex-end}
+.town{background:#219418 url("../assets/ui/scene.png") repeat-x 50% 100%/1536px 224px;border-bottom:4px solid #2B180C;min-height:224px;display:flex;align-items:flex-end}
 .town .wrap{width:100%;padding-block:24px 20px}
 .sign{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .stall{display:flex;align-items:flex-end;gap:8px}
@@ -222,7 +222,7 @@ footer a{color:var(--ink)}
   background:#9a5f2c url("../assets/ui/wood.png") repeat 0 0/44px 36px;color:#FFF4DC;text-shadow:1px 1px 0 #3A1D08;border:4px solid #2B180C;
   padding:10px 18px;font:500 17px var(--font);transition:transform .2s steps(4);z-index:20;max-width:calc(100% - 32px)}
 .toast.on{transform:translate(-50%,0);visibility:visible}
-@media (max-width:560px){.town{background-size:768px 168px;min-height:168px}.keeper{width:42px;height:63px}.board .gem{width:23px;height:25px}.board p{font-size:14px}}
+@media (max-width:560px){.town{background-size:1152px 168px;min-height:168px}.keeper{width:42px;height:63px}.board .gem{width:23px;height:25px}.board p{font-size:14px}}
 
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 

@@ -331,16 +331,17 @@ const READER_URL = "https://gmakxiykchiuygzwffel.supabase.co/functions/v1/read-i
 const READER_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYWt4aXlrY2hpdXlnendmZmVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MDUxNTIsImV4cCI6MjA4ODk4MTE1Mn0.eTfbpxE1fiWmJrjQrY3UaKzXh9sdDroGH03mf_4fSCY";
 function fileToDataUrl(file){
   return new Promise((res, rej) => {
-    const big = file.size > 3.5 * 1024 * 1024;
+    // Shrink before upload: smaller pictures upload and read much faster. Small ones go as they are.
+    const big = file.size > 600 * 1024;
     const fr = new FileReader();
     fr.onerror = () => rej(new Error("read"));
     fr.onload = () => {
       if (!big) return res(fr.result);
       const img = new Image();
       img.onload = () => {
-        const s = Math.min(1, 1800 / Math.max(img.width, img.height));
+        const s = Math.min(1, 1600 / Math.max(img.width, img.height));
         const c = document.createElement("canvas"); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
-        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", .9));
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", .88));
       };
       img.onerror = () => rej(new Error("decode"));
       img.src = fr.result;
