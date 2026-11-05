@@ -153,7 +153,7 @@ img{image-rendering:pixelated}
 .shelf.compact .slot .pic img{transform:none!important}
 .shelf.compact .badge{display:none}
 .shelf.compact .meta{align-items:center;text-align:center;width:100%}
-.shelf.compact .meta .nm{font-size:14px;line-height:1.1;min-height:2.2em;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere}
+.shelf.compact .meta .nm{font-size:13px;letter-spacing:-.2px;line-height:1.1;min-height:2.2em;display:flex;align-items:center;justify-content:center}
 .shelf.compact .meta .px{font-size:13px}
 .shelf.compact .ea{display:none}
 .shelf.compact .px b::after{content:" g each";font-weight:400;color:var(--muted)}
