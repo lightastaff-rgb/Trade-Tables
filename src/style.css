@@ -252,4 +252,32 @@ footer a{color:var(--ink)}
 .win.collapsed > .plank{border-bottom:0}
 .receipt-col.collapsed .tape,.receipt-col.collapsed .tape-foot,.receipt-col.collapsed .receipt-note{display:none}
 .receipt-col.collapsed .tape-head{border-bottom:0;padding-bottom:14px}
+
+/* ---------- the cast ---------- */
+.mascot{display:inline-block;flex:none;width:60px;height:74px;background-repeat:no-repeat;background-size:240px 74px;image-rendering:pixelated;animation:idle1 .9s steps(4) infinite}
+.mascot.x2{width:120px;height:148px;background-size:480px 148px;animation-name:idle2}
+@keyframes idle1{to{background-position:-240px 0}}
+@keyframes idle2{to{background-position:-480px 0}}
+.m-pip{background-image:url("../assets/ui/cast_pip.png")}
+.m-shelly{background-image:url("../assets/ui/cast_shelly.png")}
+.m-rusty{background-image:url("../assets/ui/cast_rusty.png")}
+.m-oldgus{background-image:url("../assets/ui/cast_oldgus.png")}
+.m-fern{background-image:url("../assets/ui/cast_fern.png")}
+.m-nyx{background-image:url("../assets/ui/cast_nyx.png")}
+.shelf h3.grp{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:14px 0 8px;min-height:60px}
+.shelf h3.grp .mascot{margin:-8px 4px -14px 0}
+.night-only{display:none}
+.night .night-only{display:inline-block}
+.night .day-only{display:none}
+.stall .mascot.x2{margin:-40px -30px -22px -34px}
+.header-right{display:flex;align-items:flex-end;gap:4px}
+.gus-wrap{position:relative;margin:-60px -18px -26px 0}
+.gus-wrap .mascot.hop{animation:idle2 .9s steps(4) infinite,hop .45s steps(4)}
+@keyframes hop{30%{transform:translateY(-14px)}60%{transform:translateY(-4px)}}
+.bubble{position:absolute;right:62px;bottom:120px;width:max-content;max-width:220px;background:#FFFDF4;color:#3A2414;border:3px solid #2B180C;
+  padding:7px 10px;font:500 15px/1.2 var(--font);box-shadow:3px 3px 0 rgba(0,0,0,.25);z-index:3;animation:pop-in .25s steps(3)}
+.bubble::after{content:"";position:absolute;right:-12px;bottom:8px;border:6px solid transparent;border-left-color:#2B180C}
+@keyframes pop-in{from{transform:scale(.6);opacity:0}}
+@media (max-width:760px){.gus-wrap{display:none}}
+@media (max-width:560px){.stall .mascot.x2{width:60px;height:74px;background-size:240px 74px;animation-name:idle1;margin:-16px -14px -8px -16px}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}

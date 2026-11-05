@@ -2,26 +2,26 @@ const SPRITES = {"aerolatas": "assets/items/aerolatas.png", "bones": "assets/ite
 const KEEPER = "assets/ui/keeper.png";
 
 const GROUPS = [
-  {name:"Minerals", items:[
+  {name:"Minerals", cast:"pip", castName:"Pip the Miner", items:[
     {id:"ores", name:"Ores", price:5, sprite:"m5"},
     {id:"rubys", name:"Rubys / Sapphires", price:7, sprite:"m7"},
     {id:"emeralds", name:"Emeralds", price:8, sprite:"m8"},
     {id:"golddia", name:"Gold / Diamonds", price:10, sprite:"m10"},
   ]},
-  {name:"Shells", items:[
+  {name:"Shells", cast:"shelly", castName:"Shelly the Beachcomber", items:[
     {id:"aerolatas", name:"Aerolatas", price:3, sprite:"s3"},
     {id:"sandscall", name:"Sandscall", price:5, sprite:"s5"},
     {id:"sanddollars", name:"Sand Dollars", price:5, sprite:"s5"},
     {id:"crab", name:"Crab Shells", price:6, sprite:"s6"},
     {id:"starfish", name:"Starfish", price:7, sprite:"s7"},
   ]},
-  {name:"Trash", items:[
+  {name:"Trash", cast:"rusty", castName:"Rusty the Trash Collector", items:[
     {id:"paper", name:"Paper", price:4, sprite:"t4"},
     {id:"newspaper", name:"Newspaper", price:4, sprite:"t4"},
     {id:"bottles", name:"Bottles", price:5, sprite:"t5"},
     {id:"tires", name:"Tires", price:6, sprite:"t6"},
   ]},
-  {name:"Forage", items:[
+  {name:"Forage", cast:"fern", castName:"Fern the Forager", items:[
     {id:"mushrooms", name:"Mushrooms", price:5, sprite:"mu5"},
   ]},
   {name:"Body Parts", items:[
@@ -97,6 +97,7 @@ function applyTheme(){
   const root = document.documentElement;
   if (S.theme) root.setAttribute("data-theme", S.theme); else root.removeAttribute("data-theme");
   const dark = S.theme ? S.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.classList.toggle("night", dark);
   $("#themeIcon").textContent = dark ? "☀" : "☾";
   $("#themeLbl").textContent = dark ? "Day market" : "Night market";
 }
@@ -105,12 +106,13 @@ $("#themeBtn").onclick = () => {
   S.theme = dark ? "light" : "dark"; save(); applyTheme();
 };
 applyTheme();
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (!S.theme) applyTheme(); }); } catch (_) {}
 
 /* ---------- bag ---------- */
 function buildShelf(){
   const shelf = $("#shelf");
   shelf.innerHTML = GROUPS.map(g => `
-    <h3><span class="ribbon">${g.name}</span></h3>
+    <h3 class="grp"><span class="ribbon">${g.name}</span>${g.cast ? `<span class="mascot m-${g.cast}" role="img" aria-label="${g.castName}" title="${g.castName}"></span>` : ""}</h3>
     <div class="slots">${g.items.map(it => `
       <div class="slot" data-id="${it.id}">
         <div class="pic"><img src="${SPRITES[it.id] || ""}" alt="" width="72" height="72"><span class="badge" aria-hidden="true"></span></div>
@@ -163,6 +165,14 @@ $("#emptyBtn").onclick = () => {
 const swapIcon = `<svg viewBox="0 0 18 18" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M5 1h2v2h2v2H7v10H5V5H3V3h2zM11 3h2v10h2v2h-2v2h-2v-2H9v-2h2z"/></svg>`;
 const convs = {};
 const TRO_IMG = "assets/ui/tro.png";
+const GUS_LINES = ["Pleasure doing business!", "A fine trade!", "Tro well earned!", "Come back soon!", "Shiny gralats!", "That's a deal!"];
+let gusT;
+function gusCheer(entry){
+  const g = $("#gus"), b = $("#gusBubble"); if (!g || !b) return;
+  b.textContent = entry && entry.tro > 0 ? `${GUS_LINES[Math.floor(Math.random() * GUS_LINES.length)]} ${fmt2(entry.tro)} Tro` : GUS_LINES[0];
+  b.hidden = false; g.classList.remove("hop"); void g.offsetWidth; g.classList.add("hop");
+  clearTimeout(gusT); gusT = setTimeout(() => { b.hidden = true; }, 2600);
+}
 function celebrate(el){
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const colors = ["var(--gold)","var(--rose)","var(--lav)","var(--mint)"];
@@ -217,7 +227,7 @@ function makeConverter(key, el, cfg){
       entry = {type:cfg.logType, input:String(a), inputLabel:cfg.unit, ratio:r, tro:t, direction:"forward"};
     }
     said.classList.remove("pop"); void said.offsetWidth; said.classList.add("pop");
-    celebrate(said);
+    celebrate(said); gusCheer(entry);
     addLog(entry);
   };
   top.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); convert(); } });

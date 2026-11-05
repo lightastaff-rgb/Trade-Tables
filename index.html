@@ -13,14 +13,15 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preload" href="assets/fonts/pixelify-sans-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/pixelify-sans-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=936314bfa0">
+<link rel="stylesheet" href="css/style.css?v=81044ecee3">
 </head>
 <body>
 <header class="town">
   <div class="wrap">
     <div class="sign">
       <div class="stall">
-        <img class="keeper" src="assets/ui/keeper.png" alt="" width="56" height="84">
+        <img class="keeper day-only" src="assets/ui/keeper.png" alt="" width="56" height="84">
+        <span class="mascot x2 m-nyx night-only" role="img" aria-label="Nyx the Night Vendor" title="Nyx the Night Vendor"></span>
         <div class="board">
           <img class="gem" src="assets/ui/gralat.png" alt="" width="46" height="50">
           <div>
@@ -29,9 +30,15 @@
           </div>
         </div>
       </div>
-      <button class="btn" id="themeBtn" type="button" aria-label="Switch day or night market">
-        <span id="themeIcon">☾</span> <span id="themeLbl">Night market</span>
-      </button>
+      <div class="header-right">
+        <div class="gus-wrap">
+          <span class="bubble" id="gusBubble" aria-live="polite" hidden></span>
+          <span class="mascot x2 m-oldgus" id="gus" role="img" aria-label="Old Gus the Trader" title="Old Gus the Trader"></span>
+        </div>
+        <button class="btn" id="themeBtn" type="button" aria-label="Switch day or night market">
+          <span id="themeIcon">☾</span> <span id="themeLbl">Night market</span>
+        </button>
+      </div>
     </div>
   </div>
 </header>
@@ -119,6 +126,6 @@
   </div>
 </footer>
 <div class="toast" id="toast" role="status"></div>
-<script src="app.js?v=cdc388e850" defer></script>
+<script src="app.js?v=836579b4a1" defer></script>
 </body>
 </html>
