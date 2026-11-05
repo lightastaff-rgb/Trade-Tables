@@ -39,7 +39,7 @@ let S = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:fal
 const isNum = v => typeof v === "number" && Number.isFinite(v);
 const clampN = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 function cleanState(raw){
-  const out = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:false}}, log:[], theme:null, layout:null, layoutV:2, collapsed:{}};
+  const out = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:false}}, log:[], theme:null, layout:null, layoutV:2, collapsed:{}, compact:false};
   if (!raw || typeof raw !== "object") return out;
   const ids = new Set(ITEMS.map(i => i.id));
   if (raw.qty && typeof raw.qty === "object") for (const [k, v] of Object.entries(raw.qty)) {
@@ -67,6 +67,7 @@ function cleanState(raw){
     }
     if (ok) out.layout = L;
   }
+  if (raw.compact === true) out.compact = true;
   if (raw.collapsed && typeof raw.collapsed === "object") for (const id of ["winBag","convG","convR","winReceipt"]) if (raw.collapsed[id] === true) out.collapsed[id] = true;
   return out;
 }
@@ -114,7 +115,7 @@ function buildShelf(){
     <div class="slots">${g.items.map(it => `
       <div class="slot" data-id="${it.id}">
         <div class="pic"><img src="${SPRITES[it.id] || ""}" alt="" width="72" height="72"><span class="badge" aria-hidden="true"></span></div>
-        <div class="meta"><span class="nm">${it.name}</span><span class="px"><b>${it.price}</b> gralats each</span></div>
+        <div class="meta"><span class="nm">${it.name}</span><span class="px"><b>${it.price}</b><span class="ea"> gralats each</span></span></div>
         <div class="qty">
           <button class="btn" type="button" data-step="-1" aria-label="One less ${it.name}">−</button>
           <span class="well"><input id="q-${it.id}" type="number" inputmode="numeric" min="0" placeholder="0" aria-label="${it.name} amount"></span>
@@ -624,6 +625,14 @@ byId("resetLayout").onclick = () => { S.layout = null; save(); applyFree(); toas
 const COL_IDS = ["winBag","convG","convR","winReceipt"];
 const COL_NAMES = {winBag:"Inventory Bag", convG:"Gralats to Tro", convR:"Rocks to Tro", winReceipt:"Trade Receipt"};
 S.collapsed = S.collapsed || {};
+/* compact bag: every item in one tight grid, no scrolling through groups */
+function applyCompact(){
+  const on = !!S.compact;
+  $("#shelf").classList.toggle("compact", on);
+  const b = $("#compactBtn"); b.setAttribute("aria-pressed", on ? "true" : "false"); b.textContent = on ? "Full view" : "Compact view";
+}
+$("#compactBtn").onclick = () => { S.compact = !S.compact; save(); applyCompact(); if (typeof relayout === "function") relayout(); };
+applyCompact();
 const chevSvg = '<svg viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M1 3h8v1H1zM2 4h6v1H2zM3 5h4v1H3zM4 6h2v1H4z"/></svg>';
 function relayout(){ if (current && !S.layout) applyFree(); else if (current) standH(); }
 function syncCollapseAll(){
