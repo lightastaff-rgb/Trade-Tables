@@ -349,6 +349,19 @@ function fileToDataUrl(file){
     fr.readAsDataURL(file);
   });
 }
+// Add up listed stacks in code so a stack is never counted twice.
+function sumStacks(res, names){
+  const totals = {}, seen = new Set();
+  const list = res && Array.isArray(res.stacks) ? res.stacks.slice(0, 200) : [];
+  list.forEach(st => {
+    const q = Number(st && st.quantity), item = st && st.item;
+    if (!names.includes(item) || !Number.isFinite(q) || q <= 0) return;
+    const key = String(st.label || "").trim().toLowerCase() + "|" + q;
+    if (seen.has(key)) return; seen.add(key);
+    totals[item] = (totals[item] || 0) + q;
+  });
+  return n => totals[n] || 0;
+}
 function fillFromCounts(get){
   let found = 0;
   ITEMS.forEach(it => {
@@ -404,20 +417,19 @@ async function readShot(file){
   if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) { shotStatus("Use a PNG, JPEG or WEBP picture.", true); return; }
   setBusy(true); shotStatus("Reading your screenshot…");
   const names = ITEMS.map(i => i.name);
-  const prompt = `This is a GraalOnline Era screenshot (inventory, trade window, or item list). Count how many of each sellable item the player has.
-Item names: ${JSON.stringify(names)}
+  const prompt = `This is a GraalOnline Era screenshot (inventory, trade window, or item list). List every visible item stack, slot or quantity label exactly once. Do not add anything up yourself.
+Allowed items: ${JSON.stringify(names)}
 Rules:
-- "Rubys / Sapphires" sums rubies and sapphires. "Gold / Diamonds" sums gold and diamonds. Plain rocks or ore count as "Ores".
-- "Bones / Feet / Hands" sums bones, feet and hands. "Brains / Hearts" sums brains and hearts.
-- When an icon has a number badge or an "x12" label, use that number as the stack size. Do not also count the icon itself as 1.
-- When the same item appears in several slots, add the slots together.
-- For loose icons with no number, count each distinct icon, including partly hidden ones.
-- Ignore gralat or currency counters, buttons, and anything not in the list.
-- Use 0 for items that are not shown. Never guess items you cannot see.
-Reply with only one JSON object whose keys are exactly the item names above and whose values are whole numbers.`;
+- One entry per stack: "label" is the text shown (for example "x1,418 mushroom"), "quantity" is its number, "item" is the matching allowed item.
+- Commas are thousands separators (x1,418 = 1418). "K" means thousands (2.5K = 2500).
+- The icon next to a quantity label is the same stack, never a separate entry.
+- All mushroom colours (plain, yellow, purple, red) are "Mushrooms". "broken bottle trash" is "Bottles". Rubies and sapphires are "Rubys / Sapphires"; gold and diamonds are "Gold / Diamonds"; rocks or ore are "Ores"; bones, feet and hands are "Bones / Feet / Hands"; brains and hearts are "Brains / Hearts".
+- Loose icons with no number are quantity 1 each.
+- Skip gralat or currency counters, buttons, and anything not in the allowed list. Never guess items you cannot see.
+Reply with only JSON: {"stacks":[{"label":"...","quantity":0,"item":"..."}]}`;
   try {
     const res = await sample.json(prompt, {images:[file]});
-    fillFromCounts(n => res && res[n]);
+    fillFromCounts(sumStacks(res, names));
   } catch (e) {
     const code = e && e.code;
     if (code === "not_granted" || code === "sampling_disabled" || code === "images_unavailable" || code === "not_declared" || code === "capability_disabled" || code === "capability_removed") {
