@@ -618,6 +618,21 @@ byId("collapseAll").onclick = () => {
 byId("abacus").addEventListener("toggle", () => relayout());
 syncCollapseAll();
 
+
+/* ---------- installable app (website only) ---------- */
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; $("#installBtn").hidden = false; });
+$("#installBtn").onclick = async () => {
+  if (!installEvt) return;
+  installEvt.prompt();
+  try { await installEvt.userChoice; } catch (_) {}
+  installEvt = null; $("#installBtn").hidden = true;
+};
+window.addEventListener("appinstalled", () => { $("#installBtn").hidden = true; toast("Trade Stand installed"); });
+if ("serviceWorker" in navigator && !window.claude && (location.protocol === "https:" || location.hostname === "127.0.0.1" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+
 /* ---------- boot ---------- */
 buildShelf();
 refreshBag(false);

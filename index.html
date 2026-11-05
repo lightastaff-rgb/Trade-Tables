@@ -3,14 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src https://gmakxiykchiuygzwffel.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src https://gmakxiykchiuygzwffel.supabase.co; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <title>Graal Era Trade Stand</title>
 <meta name="description" content="Graal Era trade calculator: count your sellables, price them in gralats, convert gralats and rocks to Tro, and copy the trade into chat.">
 <meta property="og:title" content="Graal Era Trade Stand">
 <meta property="og:description" content="Count your loot, price it in gralats, trade it for Tro.">
 <meta name="theme-color" content="#219418">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Trade Stand">
 <link rel="preload" href="assets/fonts/pixelify-sans-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/pixelify-sans-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/style.css?v=81044ecee3">
@@ -35,6 +38,10 @@
           <span class="bubble" id="gusBubble" aria-live="polite" hidden></span>
           <span class="mascot x2 m-oldgus" id="gus" role="img" aria-label="Old Gus the Trader" title="Old Gus the Trader"></span>
         </div>
+        <button class="btn" id="installBtn" type="button" hidden>
+          <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M7 1h2v7h2v2H9v2H7v-2H5V8h2zM5 6h1v2H5zm5 0h1v2h-1zM1 12h2v1h10v-1h2v3H1z"/></svg>
+          Install app
+        </button>
         <button class="btn" id="themeBtn" type="button" aria-label="Switch day or night market">
           <span id="themeIcon">☾</span> <span id="themeLbl">Night market</span>
         </button>
@@ -126,6 +133,6 @@
   </div>
 </footer>
 <div class="toast" id="toast" role="status"></div>
-<script src="app.js?v=836579b4a1" defer></script>
+<script src="app.js?v=e0125ec69e" defer></script>
 </body>
 </html>
