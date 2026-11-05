@@ -144,23 +144,26 @@ img{image-rendering:pixelated}
 .qty .well:focus-within{outline:3px dashed var(--focus);outline-offset:2px}
 .val{grid-column:1/-1;text-align:right;font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums}
 .slot.has .val{color:var(--ink)}
-/* compact bag */
-.shelf.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;padding-top:12px}
+/* compact bag: one slim row per item */
+.shelf.compact{display:flex;flex-direction:column;gap:4px;padding-top:12px}
 .shelf.compact h3{display:none}
 .shelf.compact .slots{display:contents}
-.shelf.compact .slot{grid-template-columns:minmax(0,1fr);justify-items:center;gap:4px;padding:6px 6px 8px;border-width:4px;border-image-width:4px}
-.shelf.compact .slot .pic,.shelf.compact .slot .pic img{width:48px;height:48px}
+.shelf.compact .slot{grid-template-columns:32px minmax(0,1fr) 96px 64px;align-items:center;gap:10px;padding:2px 8px;border-width:3px;border-image-width:3px}
+.shelf.compact .slot:nth-child(odd){background:var(--parch)}
+.shelf.compact .slot.has{background:var(--has)}
+.shelf.compact .slot .pic,.shelf.compact .slot .pic img{width:32px;height:32px}
 .shelf.compact .slot .pic img{transform:none!important}
 .shelf.compact .badge{display:none}
-.shelf.compact .meta{align-items:center;text-align:center;width:100%}
-.shelf.compact .meta .nm{font-size:13px;letter-spacing:-.2px;line-height:1.1;min-height:2.2em;display:flex;align-items:center;justify-content:center}
-.shelf.compact .meta .px{font-size:13px}
+.shelf.compact .meta{flex-direction:row;align-items:baseline;justify-content:space-between;gap:8px}
+.shelf.compact .meta .nm{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.shelf.compact .meta .px{font-size:14px;white-space:nowrap;flex:none}
 .shelf.compact .ea{display:none}
-.shelf.compact .px b::after{content:" g each";font-weight:400;color:var(--muted)}
-.shelf.compact .qty{grid-template-columns:minmax(0,1fr);width:100%}
+.shelf.compact .px b::after{content:" g";font-weight:400;color:var(--muted)}
+.shelf.compact .qty{grid-column:auto;grid-template-columns:minmax(0,1fr)}
 .shelf.compact .qty .btn{display:none}
-.shelf.compact .qty input{font-size:18px;padding:3px 2px}
-.shelf.compact .val{display:none}
+.shelf.compact .qty input{font-size:17px;padding:2px}
+.shelf.compact .val{grid-column:auto;font-size:14px;white-space:nowrap}
+@media (max-width:420px){.shelf.compact .slot{grid-template-columns:28px minmax(0,1fr) 80px;gap:8px}.shelf.compact .slot .pic,.shelf.compact .slot .pic img{width:28px;height:28px}.shelf.compact .val{display:none}}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
 /* ---------- stand counter ---------- */
