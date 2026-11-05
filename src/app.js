@@ -359,7 +359,7 @@ function fillFromCounts(get){
   shotStatus(found ? `Filled in ${found} item${found > 1 ? "s" : ""} from your screenshot. Give the counts a quick check.` : "No sellables found in that picture.");
 }
 async function readShotRemote(file){
-  const btn = $("#shotBtn"); btn.disabled = true; shotStatus("Reading your screenshot…");
+  setBusy(true); shotStatus("Reading your screenshot…");
   try {
     const image = await fileToDataUrl(file);
     const r = await fetch(READER_URL, {method:"POST", headers:{"Content-Type":"application/json", "apikey":READER_KEY, "Authorization":"Bearer " + READER_KEY}, body:JSON.stringify({image})});
@@ -374,7 +374,7 @@ async function readShotRemote(file){
     fillFromCounts(n => counts[n]);
   } catch (e) {
     shotStatus("Couldn't reach the screenshot reader. Check your connection and try again.", true);
-  } finally { btn.disabled = false; $("#shotFile").value = ""; }
+  } finally { setBusy(false); }
 }
 const shotStatus = (msg, err) => { const s = $("#shotStatus"); s.textContent = msg; s.classList.toggle("err", !!err); };
 const READ_KEY = "graal-trade-stand-reads";
@@ -392,7 +392,8 @@ function readAllowed(){
 async function readShot(file){
   if (!file) return;
   if (file.size > 20 * 1024 * 1024) { shotStatus("That picture is too big. Use one under 20 MB.", true); return; }
-  if ($("#shotBtn").disabled) return;
+  if (busy) return;
+  showThumb(file);
   const gate = readAllowed(); if (!gate.ok) { shotStatus(gate.msg, true); return; }
   if (!sample) {
     if (!remote) return;
@@ -400,7 +401,7 @@ async function readShot(file){
     return readShotRemote(file);
   }
   if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) { shotStatus("Use a PNG, JPEG or WEBP picture.", true); return; }
-  const btn = $("#shotBtn"); btn.disabled = true; shotStatus("Reading your screenshot…");
+  setBusy(true); shotStatus("Reading your screenshot…");
   const names = ITEMS.map(i => i.name);
   const prompt = `This is a GraalOnline Era screenshot (inventory, trade window, or item list). Count how many of each sellable item the player has.
 Item names: ${JSON.stringify(names)}
@@ -419,29 +420,63 @@ Reply with only one JSON object whose keys are exactly the item names above and 
   } catch (e) {
     const code = e && e.code;
     if (code === "not_granted" || code === "sampling_disabled" || code === "images_unavailable" || code === "not_declared" || code === "capability_disabled" || code === "capability_removed") {
-      btn.hidden = true; shotStatus("Screenshot reading isn't available here. Type your counts in instead.", true);
+      $("#shotZone").hidden = true; shotStatus("Screenshot reading isn't available here. Type your counts in instead.", true);
     } else if (code === "rate_limited") shotStatus("Too many reads right now. Try again in a minute.", true);
     else if (code === "image_rejected") shotStatus("That picture couldn't be read. Try a smaller PNG or JPEG.", true);
     else if (code === "invalid_json" || code === "empty_completion") shotStatus("Couldn't make out the counts. Try a clearer, closer screenshot.", true);
     else if (code !== "cancelled") shotStatus("Couldn't read that picture. Try again.", true);
-  } finally { btn.disabled = false; $("#shotFile").value = ""; }
+  } finally { setBusy(false); }
 }
-$("#shotBtn").onclick = () => $("#shotFile").click();
+/* ---------- paste / drop / pick a screenshot ---------- */
+const zone = $("#shotZone");
+let busy = false, thumbUrl = null;
+function setBusy(on){ busy = on; zone.classList.toggle("busy", on); zone.setAttribute("aria-busy", String(on)); $("#pasteBtn").disabled = on; if (!on) $("#shotFile").value = ""; }
+function showThumb(file){
+  try { if (thumbUrl) URL.revokeObjectURL(thumbUrl); thumbUrl = URL.createObjectURL(file); const t = $("#shotThumb"); t.src = thumbUrl; t.hidden = false; } catch (_) {}
+}
+const imageFrom = list => [...(list || [])].find(f => f && f.type && f.type.startsWith("image/"));
+const readerOn = () => (sample || remote) && !zone.hidden;
+if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) $("#pasteKey").textContent = "⌘";
+zone.addEventListener("click", e => { if (busy || e.target.closest("#pasteBtn")) return; $("#shotFile").click(); });
+zone.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target === zone) { e.preventDefault(); if (!busy) $("#shotFile").click(); } });
 $("#shotFile").onchange = e => readShot(e.target.files && e.target.files[0]);
-document.addEventListener("paste", e => {
-  if ((!sample && !remote) || $("#shotBtn").hidden) return;
-  if (e.target.closest && e.target.closest("#calc")) return;
-  const f = [...(e.clipboardData ? e.clipboardData.files : [])].find(f => f.type.startsWith("image/"));
-  if (f) { e.preventDefault(); readShot(f); }
+["dragenter","dragover"].forEach(t => zone.addEventListener(t, e => { if (!readerOn()) return; e.preventDefault(); zone.classList.add("drag-over"); }));
+["dragleave","dragend"].forEach(t => zone.addEventListener(t, () => zone.classList.remove("drag-over")));
+zone.addEventListener("drop", e => {
+  e.preventDefault(); zone.classList.remove("drag-over");
+  const f = imageFrom(e.dataTransfer && e.dataTransfer.files);
+  if (f) readShot(f); else shotStatus("Drop an image file (PNG, JPEG or WEBP).", true);
 });
-function useRemoteReader(){ if (sample) return; remote = true; $("#shotBtn").hidden = false; $("#shotFile").accept = "image/png,image/jpeg,image/webp"; }
+// Ctrl+V / Cmd+V works anywhere on the page, not only inside the box
+document.addEventListener("paste", e => {
+  if (!readerOn()) return;
+  if (e.target.closest && e.target.closest("#calc")) return;
+  const f = imageFrom(e.clipboardData && e.clipboardData.files);
+  if (f) { e.preventDefault(); readShot(f); }
+  else if (e.target === zone || zone.contains(e.target)) shotStatus("There's no image on your clipboard. Copy a screenshot first.", true);
+});
+// One-tap Paste button, where the browser allows reading images from the clipboard
+$("#pasteBtn").onclick = async () => {
+  try {
+    const items = await navigator.clipboard.read();
+    for (const it of items) {
+      const type = it.types.find(t => t.startsWith("image/"));
+      if (type) { const blob = await it.getType(type); return readShot(new File([blob], "clipboard." + type.split("/")[1], {type})); }
+    }
+    shotStatus("There's no image on your clipboard. Copy a screenshot first.", true);
+  } catch (_) {
+    shotStatus("Your browser didn't allow the Paste button. Press Ctrl+V instead, or click the box to choose a file.", true);
+  }
+};
+function showReader(){ zone.hidden = false; if (!window.claude && navigator.clipboard && typeof navigator.clipboard.read === "function") $("#pasteBtn").hidden = false; }
+function useRemoteReader(){ if (sample) return; remote = true; showReader(); $("#shotFile").accept = "image/png,image/jpeg,image/webp"; }
 (async () => {
   try {
     if (!window.claude || !claude.use) { useRemoteReader(); return; }
     const s = await claude.use("sample"); if (!s) { useRemoteReader(); return; }
     const lim = await s.limits().catch(() => null);
     if (!lim || !lim.images) { useRemoteReader(); return; }
-    sample = s; $("#shotBtn").hidden = false;
+    sample = s; showReader();
     $("#shotFile").accept = lim.images.mediaTypes.join(",");
   } catch (e) { useRemoteReader(); }
 })();

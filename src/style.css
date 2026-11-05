@@ -97,6 +97,23 @@ img{image-rendering:pixelated}
 .purse .big span{font-size:18px;font-weight:500;color:var(--muted)}
 .purse .side{margin-left:auto;text-align:right;font-size:15px;color:var(--muted);line-height:1.3}
 .bag-actions{display:flex;gap:10px;flex-wrap:wrap}
+.shot-zone{position:relative;display:flex;align-items:center;gap:14px;padding:14px 16px;cursor:pointer;min-height:84px;transition:background .15s steps(3)}
+.shot-zone::after{content:"";position:absolute;inset:5px;border:3px dashed var(--muted);opacity:.45;pointer-events:none}
+.shot-zone:hover::after,.shot-zone:focus-visible::after{opacity:.8}
+.shot-zone.drag-over{background:var(--has)}
+.shot-zone.drag-over::after{border-color:var(--gold);opacity:1}
+.shot-zone.busy{cursor:progress}
+.shot-zone.busy .shot-title::after{content:"";display:inline-block;width:8px;height:8px;margin-left:8px;background:currentColor;animation:blink .6s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.shot-icon{width:32px;height:32px;flex:none;color:var(--muted)}
+.shot-thumb{width:72px;height:54px;flex:none;object-fit:cover;border:3px solid #2B180C;image-rendering:auto;background:#000}
+.shot-thumb:not([hidden]) + .shot-icon{display:none}
+.shot-copy{flex:1;min-width:0}
+.shot-title{font:600 18px/1.1 var(--font)}
+.shot-hint{font-size:14px;line-height:1.35;color:var(--muted);margin-top:4px}
+.shot-hint kbd{font:600 13px/1 var(--font);border:2px solid var(--muted);border-bottom-width:3px;padding:1px 5px;background:var(--parch);color:var(--ink)}
+.hint-touch{display:none}
+@media (pointer:coarse){.hint-desk{display:none}.hint-touch{display:inline}}
 .shot-status{font-size:15px;color:var(--muted)}
 .shot-status:empty{display:none}
 .shot-status.err{color:var(--rose)}

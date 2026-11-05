@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://gmakxiykchiuygzwffel.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src https://gmakxiykchiuygzwffel.supabase.co; base-uri 'none'; form-action 'none'; object-src 'none'; manifest-src 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="no-referrer">
 <title>Graal Era Trade Stand</title>
 <meta name="description" content="Graal Era trade calculator: count your sellables, price them in gralats, convert gralats and rocks to Tro, and copy the trade into chat.">
@@ -13,7 +13,7 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="preload" href="assets/fonts/pixelify-sans-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/pixelify-sans-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=d22edcc2ea">
+<link rel="stylesheet" href="css/style.css?v=936314bfa0">
 </head>
 <body>
 <header class="town">
@@ -58,12 +58,17 @@
           </div>
           <div class="side"><span id="bagCount">0</span> items<br><span id="bagKinds">0</span> <span id="kindsWord">kinds</span></div>
         </div>
+        <div class="shot-zone well" id="shotZone" tabindex="0" role="button" aria-describedby="shotHint" hidden>
+          <img class="shot-thumb" id="shotThumb" alt="Your screenshot" hidden>
+          <svg class="shot-icon" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M1 4h4l1-2h4l1 2h4v10H1zM3 6v6h10V6zm5 1a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>
+          <div class="shot-copy">
+            <div class="shot-title">Paste a screenshot here</div>
+            <div class="shot-hint" id="shotHint"><span class="hint-desk">Copy your inventory screenshot, then press <kbd id="pasteKey">Ctrl</kbd>+<kbd>V</kbd>. You can also drop an image here or click to choose a file.</span><span class="hint-touch">Tap Paste after copying a screenshot, or tap here to choose one.</span></div>
+          </div>
+          <button class="btn" id="pasteBtn" type="button" hidden>Paste</button>
+        </div>
         <div class="bag-actions">
           <input type="file" id="shotFile" accept="image/png,image/jpeg,image/webp" hidden>
-          <button class="btn" id="shotBtn" type="button" hidden>
-            <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M1 4h4l1-2h4l1 2h4v10H1zM3 6v6h10V6zm5 1a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>
-            Read a screenshot
-          </button>
           <button class="btn" id="emptyBtn" type="button">Empty bag</button>
         </div>
         <div class="shot-status" id="shotStatus" role="status"></div>
@@ -114,6 +119,6 @@
   </div>
 </footer>
 <div class="toast" id="toast" role="status"></div>
-<script src="app.js?v=1d489ef7ed" defer></script>
+<script src="app.js?v=cdc388e850" defer></script>
 </body>
 </html>
