@@ -498,6 +498,36 @@ const stand = document.querySelector(".stand");
 const mqWide = matchMedia("(min-width: 761px)");
 let zTop = 10, current = null, hPending = false;
 const byId = id => document.getElementById(id);
+// Magnetic snapping: edges pull into line with other windows, the page edges, or sit a tidy gap apart.
+const SNAP = 18, GAP = 24;
+const guideV = document.createElement("div"), guideH = document.createElement("div");
+guideV.className = "snap-guide v"; guideH.className = "snap-guide h"; guideV.hidden = guideH.hidden = true;
+function hideGuides(){ guideV.hidden = guideH.hidden = true; }
+function snapTo(id, x, y, w, h, W, off){
+  if (!guideV.isConnected) stand.append(guideV, guideH);
+  let bx = null, by = null, gx = null, gy = null;
+  const tryX = (cand, line) => { const d = Math.abs(cand - x); if (d <= SNAP && (!bx || d < bx.d)) { bx = {d, v:cand}; gx = line; } };
+  const tryY = (cand, line) => { const d = Math.abs(cand - y); if (d <= SNAP && (!by || d < by.d)) { by = {d, v:cand}; gy = line; } };
+  if (!off) {
+    tryX(0, 0); tryX(W - w, W); tryY(0, 0);
+    DRAG_IDS.forEach(o => {
+      if (o === id) return;
+      const e = byId(o); if (!e || !e.offsetWidth) return;
+      const ox = e.offsetLeft, oy = e.offsetTop, ow = e.offsetWidth, oh = e.offsetHeight;
+      const nearY = y < oy + oh + GAP + SNAP && y + h > oy - GAP - SNAP;
+      const nearX = x < ox + ow + GAP + SNAP && x + w > ox - GAP - SNAP;
+      if (nearY) { tryX(ox + ow + GAP, null); tryX(ox - w - GAP, null); }
+      tryX(ox, ox); tryX(ox + ow - w, ox + ow);
+      if (nearX) { tryY(oy + oh + GAP, null); tryY(oy - h - GAP, null); }
+      tryY(oy, oy); tryY(oy + oh - h, oy + oh);
+    });
+  }
+  const nx = bx ? bx.v : Math.round(x / 8) * 8, ny = by ? by.v : Math.round(y / 8) * 8;
+  guideV.hidden = !(bx && gx !== null); guideH.hidden = !(by && gy !== null);
+  if (!guideV.hidden) guideV.style.left = (gx - 1) + "px";
+  if (!guideH.hidden) guideH.style.top = (gy - 1) + "px";
+  return {x:nx, y:ny};
+}
 function standH(){
   let m = 0; DRAG_IDS.forEach(id => { const el = byId(id); m = Math.max(m, el.offsetTop + el.offsetHeight); });
   stand.style.height = (m + 48) + "px";
@@ -565,14 +595,18 @@ DRAG_IDS.forEach(id => {
       ox = current[id].x; oy = current[id].y; el.classList.add("dragging");
     }
     const W = stand.clientWidth, w = Math.min(current[id].w, W);
-    cx = Math.max(0, Math.min(Math.round((ox + dx) / 8) * 8, W - w));
-    cy = Math.max(0, Math.round((oy + dy) / 8) * 8);
+    const s = snapTo(id, ox + dx, oy + dy, w, el.offsetHeight, W, e.altKey);
+    cx = Math.max(0, Math.min(s.x, W - w)); cy = Math.max(0, s.y);
     el.style.left = cx + "px"; el.style.top = cy + "px";
     if (!hPending) { hPending = true; requestAnimationFrame(() => { hPending = false; standH(); }); }
   });
   const end = () => {
     if (!active) return; active = false;
-    if (moved) { current[id].x = cx; current[id].y = cy; el.classList.remove("dragging"); save(); standH(); byId("resetLayout").hidden = false; }
+    if (moved) {
+      current[id].x = cx; current[id].y = cy; el.classList.remove("dragging"); hideGuides();
+      el.classList.remove("landed"); void el.offsetWidth; el.classList.add("landed");
+      save(); standH(); byId("resetLayout").hidden = false;
+    }
   };
   h.addEventListener("pointerup", end); h.addEventListener("pointercancel", end); h.addEventListener("lostpointercapture", end);
   h.addEventListener("click", e => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);

@@ -238,6 +238,12 @@ footer a{color:var(--ink)}
 .drag{transition:filter .1s}
 .drag.dragging{filter:drop-shadow(0 16px 0 rgba(30,15,5,.28))!important;transform:translateY(-4px)}
 .drag.dragging .drag-handle{cursor:grabbing}
+.snap-guide{position:absolute;z-index:9999;pointer-events:none;background:repeating-linear-gradient(var(--sg-dir,90deg),var(--gold) 0 6px,transparent 6px 10px)}
+.snap-guide.v{top:0;bottom:0;width:2px;--sg-dir:180deg}
+.snap-guide.h{left:0;right:0;height:2px;--sg-dir:90deg}
+.drag.landed{animation:land .18s steps(3)}
+@keyframes land{0%{transform:translateY(-4px)}50%{transform:translateY(1px)}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.drag.landed{animation:none}}
 .receipt-col.drag .tape-head{border-top:0}
 .stand.free .receipt-note{display:none}
 
