@@ -373,52 +373,8 @@ function fillFromCounts(get){
   refreshBag(true);
   shotStatus(found ? `Filled in ${found} item${found > 1 ? "s" : ""} from your screenshot. Give the counts a quick check.` : "No sellables found in that picture.");
 }
-async function readShotRemote(file){
-  setBusy(true); shotStatus("Reading your screenshot…");
-  try {
-    const image = await fileToDataUrl(file);
-    const r = await fetch(READER_URL, {method:"POST", headers:{"Content-Type":"application/json", "apikey":READER_KEY, "Authorization":"Bearer " + READER_KEY}, body:JSON.stringify({image})});
-    let data = {}; try { data = await r.json(); } catch (_) {}
-    if (!r.ok || data.error) {
-      if (r.status === 429) shotStatus("Too many reads right now. Try again in a minute.", true);
-      else if (r.status === 402) shotStatus("The screenshot reader is out of credits. Type your counts in for now.", true);
-      else shotStatus(data.error || "Couldn't read that picture. Try again.", true);
-      return;
-    }
-    const counts = data && typeof data.counts === "object" && data.counts ? data.counts : {};
-    fillFromCounts(n => counts[n]);
-  } catch (e) {
-    shotStatus("Couldn't reach the screenshot reader. Check your connection and try again.", true);
-  } finally { setBusy(false); }
-}
-const shotStatus = (msg, err) => { const s = $("#shotStatus"); s.textContent = msg; s.classList.toggle("err", !!err); };
-const READ_KEY = "graal-trade-stand-reads";
-function readAllowed(){
-  let st = {day:"", n:0, last:0};
-  try { const v = JSON.parse(localStorage.getItem(READ_KEY) || "{}"); if (v && typeof v === "object") st = Object.assign(st, v); } catch (_) {}
-  const now = Date.now(), day = new Date().toISOString().slice(0, 10);
-  if (st.day !== day) { st.day = day; st.n = 0; }
-  if (now - (Number(st.last) || 0) < 8000) return {ok:false, msg:"Give it a few seconds between screenshots."};
-  if (st.n >= 40) return {ok:false, msg:"Daily screenshot limit reached. Type your counts in, or try again tomorrow."};
-  st.n += 1; st.last = now;
-  try { localStorage.setItem(READ_KEY, JSON.stringify(st)); } catch (_) {}
-  return {ok:true};
-}
-async function readShot(file){
-  if (!file) return;
-  if (file.size > 20 * 1024 * 1024) { shotStatus("That picture is too big. Use one under 20 MB.", true); return; }
-  if (busy) return;
-  showThumb(file);
-  const gate = readAllowed(); if (!gate.ok) { shotStatus(gate.msg, true); return; }
-  if (!sample) {
-    if (!remote) return;
-    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) { shotStatus("Use a PNG, JPEG or WEBP picture.", true); return; }
-    return readShotRemote(file);
-  }
-  if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) { shotStatus("Use a PNG, JPEG or WEBP picture.", true); return; }
-  setBusy(true); shotStatus("Reading your screenshot…");
-  const names = ITEMS.map(i => i.name);
-  const prompt = `This is a GraalOnline Era screenshot (inventory, trade window, or item list). List every visible item stack, slot or quantity label exactly once. Do not add anything up yourself.
+// Shared reader used by the bag box and the Trade Chat. Resolves {item name: count}; rejects with a readable message.
+const READ_PROMPT = names => `This is a GraalOnline Era screenshot (inventory, trade window, or item list). List every visible item stack, slot or quantity label exactly once. Do not add anything up yourself.
 Allowed items: ${JSON.stringify(names)}
 Rules:
 - One entry per stack: "label" is the text shown (for example "x1,418 mushroom"), "quantity" is its number, "item" is the matching allowed item.
@@ -428,17 +384,65 @@ Rules:
 - Loose icons with no number are quantity 1 each.
 - Skip gralat or currency counters, buttons, and anything not in the allowed list. Never guess items you cannot see.
 Reply with only JSON: {"stacks":[{"label":"...","quantity":0,"item":"..."}]}`;
+async function readPicture(file){
+  const names = ITEMS.map(i => i.name), out = {};
+  const keep = get => names.forEach(n => { const v = Math.round(Number(get(n))); if (Number.isFinite(v) && v > 0 && v <= 9999999) out[n] = v; });
+  if (file.size > 20 * 1024 * 1024) throw new Error("That picture is too big. Use one under 20 MB.");
+  if (sample) {
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(file.type)) throw new Error("Use a PNG, JPEG or WEBP picture.");
+    try { keep(sumStacks(await sample.json(READ_PROMPT(names), {images:[file]}), names)); return out; }
+    catch (e) {
+      const code = e && e.code;
+      if (code === "rate_limited") throw new Error("Too many reads right now. Try again in a minute.");
+      if (code === "image_rejected") throw new Error("That picture couldn't be read. Try a smaller PNG or JPEG.");
+      if (code === "invalid_json" || code === "empty_completion") throw new Error("Couldn't make out the counts. Try a clearer, closer screenshot.");
+      const err = new Error("Couldn't read that picture. Try again."); err.code = code; throw err;
+    }
+  }
+  if (!remote) throw new Error("Screenshot reading isn't available here.");
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) throw new Error("Use a PNG, JPEG or WEBP picture.");
+  let r, data = {};
   try {
-    const res = await sample.json(prompt, {images:[file]});
-    fillFromCounts(sumStacks(res, names));
-  } catch (e) {
+    const image = await fileToDataUrl(file);
+    r = await fetch(READER_URL, {method:"POST", headers:{"Content-Type":"application/json", "apikey":READER_KEY, "Authorization":"Bearer " + READER_KEY}, body:JSON.stringify({image})});
+    try { data = await r.json(); } catch (_) {}
+  } catch (_) { throw new Error("Couldn't reach the screenshot reader. Check your connection and try again."); }
+  if (!r.ok || data.error) {
+    if (r.status === 429) throw new Error("Too many reads right now. Try again in a minute.");
+    if (r.status === 402) throw new Error("The screenshot reader is out of credits. Type your counts in for now.");
+    throw new Error(typeof data.error === "string" ? data.error.slice(0, 160) : "Couldn't read that picture. Try again.");
+  }
+  const counts = data && typeof data.counts === "object" && data.counts ? data.counts : {};
+  keep(n => counts[n]);
+  return out;
+}
+const shotStatus = (msg, err) => { const s = $("#shotStatus"); s.textContent = msg; s.classList.toggle("err", !!err); };
+const READ_KEY = "graal-trade-stand-reads";
+function readAllowed(n = 1){
+  let st = {day:"", n:0, last:0};
+  try { const v = JSON.parse(localStorage.getItem(READ_KEY) || "{}"); if (v && typeof v === "object") st = Object.assign(st, v); } catch (_) {}
+  const now = Date.now(), day = new Date().toISOString().slice(0, 10);
+  if (st.day !== day) { st.day = day; st.n = 0; }
+  if (now - (Number(st.last) || 0) < 8000) return {ok:false, msg:"Give it a few seconds between screenshots."};
+  if (st.n + n > 40) return {ok:false, msg: st.n >= 40 ? "Daily screenshot limit reached (40 a day). Type your counts in, or try again tomorrow." : `Only ${40 - st.n} screenshot read${40 - st.n === 1 ? "" : "s"} left today. Send fewer pictures.`};
+  st.n += n; st.last = now;
+  try { localStorage.setItem(READ_KEY, JSON.stringify(st)); } catch (_) {}
+  return {ok:true};
+}
+async function readShot(file){
+  if (!file) return;
+  if (file.size > 20 * 1024 * 1024) { shotStatus("That picture is too big. Use one under 20 MB.", true); return; }
+  if (busy) return;
+  if (!sample && !remote) return;
+  showThumb(file);
+  const gate = readAllowed(1); if (!gate.ok) { shotStatus(gate.msg, true); return; }
+  setBusy(true); shotStatus("Reading your screenshot…");
+  try { const got = await readPicture(file); fillFromCounts(n => got[n]); }
+  catch (e) {
     const code = e && e.code;
-    if (code === "not_granted" || code === "sampling_disabled" || code === "images_unavailable" || code === "not_declared" || code === "capability_disabled" || code === "capability_removed") {
+    if (["not_granted","sampling_disabled","images_unavailable","not_declared","capability_disabled","capability_removed"].includes(code)) {
       $("#shotZone").hidden = true; shotStatus("Screenshot reading isn't available here. Type your counts in instead.", true);
-    } else if (code === "rate_limited") shotStatus("Too many reads right now. Try again in a minute.", true);
-    else if (code === "image_rejected") shotStatus("That picture couldn't be read. Try a smaller PNG or JPEG.", true);
-    else if (code === "invalid_json" || code === "empty_completion") shotStatus("Couldn't make out the counts. Try a clearer, closer screenshot.", true);
-    else if (code !== "cancelled") shotStatus("Couldn't read that picture. Try again.", true);
+    } else if (code !== "cancelled") shotStatus(e.message || "Couldn't read that picture. Try again.", true);
   } finally { setBusy(false); }
 }
 /* ---------- paste / drop / pick a screenshot ---------- */
@@ -465,6 +469,7 @@ zone.addEventListener("drop", e => {
 document.addEventListener("paste", e => {
   if (!readerOn()) return;
   if (e.target.closest && e.target.closest("#calc")) return;
+  if (!$("#chat").hidden) return;
   const f = imageFrom(e.clipboardData && e.clipboardData.files);
   if (f) { e.preventDefault(); readShot(f); }
   else if (e.target === zone || zone.contains(e.target)) shotStatus("There's no image on your clipboard. Copy a screenshot first.", true);
@@ -494,6 +499,167 @@ function useRemoteReader(){ if (sample) return; remote = true; showReader(); $("
     $("#shotFile").accept = lim.images.mediaTypes.join(",");
   } catch (e) { useRemoteReader(); }
 })();
+
+
+/* ---------- Trade Chat: send screenshots, get gralats and Tro ---------- */
+const chat = $("#chat"), chatLog = $("#chatLog"), chatText = $("#chatText"), chatPicsEl = $("#chatPics");
+const MAX_PICS = 6;
+let chatPics = [], chatBusy = false, chatGreeted = false;
+const BY_NAME = Object.fromEntries(ITEMS.map(i => [i.name, i]));
+// words people type -> item id ("gralats", "rocks" and "tro" are money, not items)
+const ALIASES = [
+  [/\b(?:yellow|purple|red|blue|green|brown|plain)?\s*(?:mushrooms?|shrooms?)\b/g, " @mushrooms "],
+  [/\bnews\s*papers?\b|\bnewspapers?\b/g, " @newspaper "],
+  [/\bsand\s*dollars?\b|\bdollars?\b/g, " @sanddollars "],
+  [/\bsand\s*scalls?\b|\bsandscalls?\b|\bscalls?\b/g, " @sandscall "],
+  [/\bcrab(?:\s*shells?)?s?\b/g, " @crab "],
+  [/\bstar\s*fish(?:es)?\b|\bstars?\b/g, " @starfish "],
+  [/\baero(?:latas?)?s?\b/g, " @aerolatas "],
+  [/\b(?:broken\s*)?bottles?(?:\s*trash)?\b/g, " @bottles "],
+  [/\btyres?\b|\btires?\b/g, " @tires "],
+  [/\bpapers?\b/g, " @paper "],
+  [/\bores?\b/g, " @ores "],
+  [/\brub(?:y|ys|ies)\b|\bsapph?(?:ire)?s?\b/g, " @rubys "],
+  [/\bemeralds?\b|\bems?\b/g, " @emeralds "],
+  [/\bgold\b|\bdiamonds?\b|\bdias?\b/g, " @golddia "],
+  [/\bbones?\b|\bfeet\b|\bfoot\b|\bhands?\b/g, " @bones "],
+  [/\beyes?\b|\beyeballs?\b/g, " @eyes "],
+  [/\bbrains?\b|\bhearts?\b/g, " @brains "],
+  [/\bgralats?\b|\bgrals?\b|\bgs?\b/g, " @gralats "],
+  [/\brocks?\b/g, " @rocks "],
+  [/\btros?\b/g, " @tro "],
+];
+const numOf = t => { const m = /^x?(\d[\d,]*(?:\.\d+)?)(k|m)?$/.exec(t); if (!m) return null; let v = Number(m[1].replace(/,/g, "")); if (m[2] === "k") v *= 1e3; if (m[2] === "m") v *= 1e6; return Number.isFinite(v) ? v : null; };
+// Reads typed extras like "plus 40k gralats, 500 rocks at 1.5" or "1,418 mushrooms".
+function parseText(text){
+  let t = " " + String(text).toLowerCase().replace(/[×*]/g, " x ").replace(/[\/+;&|]/g, " , ") + " ";
+  const res = {items:{}, gralats:0, rocks:0, tro:0, ratioG:null, ratioR:null, unknown:[]};
+  for (let i = 0; i < 3; i++) t = t.replace(/(\d),(\d{3})(?!\d)/g, "$1$2"); // 1,418 -> 1418
+  t = t.replace(/\b(rocks?\s*(?:ratio|rate|at|@)\s*|(?:ratio|rate)\s*(?:for\s*)?rocks?\s*)(\d+(?:\.\d+)?)/g, (_, a, n) => { res.ratioR = Number(n); return " rocks "; });
+  t = t.replace(/(?:\b(?:ratio|rate)\s*(?:of|is|=)?\s*|\bat\s+|@\s*)(\d+(?:\.\d+)?)(?:\s*(?::|to)\s*1)?/g, (_, n) => { res.ratioG = Number(n); return " "; });
+  ALIASES.forEach(([re, rep]) => { t = t.replace(re, rep); });
+  const toks = t.split(/[\s,]+|\band\b|\bplus\b|\bwith\b/).filter(Boolean);
+  let pending = null, pendingItem = null;
+  const add = (key, v) => {
+    if (key === "gralats") res.gralats += v; else if (key === "rocks") res.rocks += v; else if (key === "tro") res.tro += v;
+    else res.items[key] = (res.items[key] || 0) + v;
+  };
+  for (const tok of toks) {
+    const n = numOf(tok);
+    if (n !== null) { if (pendingItem) { add(pendingItem, n); pendingItem = null; } else pending = n; continue; }
+    if (tok[0] === "@") { const key = tok.slice(1); if (pending !== null) { add(key, pending); pending = null; } else pendingItem = key; continue; }
+    if (/^[a-z]{3,}$/.test(tok) && !/^(x|of|the|have|has|got|i|my|how|much|many|what|is|are|can|make|for|in|to|worth|total|stacks?|each|also|about|plus|and|with|me|you|please|pls|do|does|get|it|that|this|im|i'm|need|want|sell|selling|trade|trading|from|these|those|screenshots?|pictures?|pics?|picture)$/.test(tok)) res.unknown.push(tok);
+  }
+  return res;
+}
+const ratioG = () => { const n = num(S.conv.g.ratio); return n > 0 ? n : 2; };
+const ratioR = () => { const n = num(S.conv.r.ratio); return n > 0 ? n : 1.3; };
+
+function chatMsg(cls, html){
+  const d = document.createElement("div"); d.className = "msg " + cls; d.innerHTML = html;
+  chatLog.append(d); chatLog.scrollTop = chatLog.scrollHeight; return d;
+}
+function greet(){
+  if (chatGreeted) return; chatGreeted = true;
+  const live = sample || remote;
+  chatMsg("bot", `<span class="who">Trade Stand</span>${live ? "Send me inventory or trade screenshots, up to " + MAX_PICS + " at once. Paste them here (Ctrl+V), drop them in, or tap +. I'll add everything up into gralats and Tro." : "Screenshot reading isn't available here, but you can type your loot."}<br><span class="sub">You can also type extras, like "plus 40k gralats", "500 rocks", or "at 2.5" to change the gralat ratio.</span>`);
+}
+function openChat(){ chat.hidden = false; $("#chatFab").setAttribute("aria-expanded", "true"); $("#chatFab").hidden = true; greet(); setTimeout(() => chatText.focus(), 0); }
+function closeChat(){ chat.hidden = true; $("#chatFab").hidden = false; $("#chatFab").setAttribute("aria-expanded", "false"); $("#chatFab").focus(); }
+$("#chatFab").onclick = openChat; $("#chatClose").onclick = closeChat;
+chat.addEventListener("keydown", e => { if (e.key === "Escape") closeChat(); });
+$("#chatFab").hidden = false;
+
+function drawPics(){
+  chatPicsEl.hidden = !chatPics.length;
+  chatPicsEl.innerHTML = chatPics.map((p, i) => `<span class="pic"><img src="${p.url}" alt="Picture ${i + 1}"><button type="button" data-rm="${i}" aria-label="Remove picture ${i + 1}">✕</button></span>`).join("");
+}
+function addPics(files){
+  const imgs = [...(files || [])].filter(f => f && f.type && f.type.startsWith("image/"));
+  if (!imgs.length) return false;
+  for (const f of imgs) {
+    if (chatPics.length >= MAX_PICS) { toast(`Up to ${MAX_PICS} pictures per message`); break; }
+    if (f.size > 20 * 1024 * 1024) { toast("Skipped a picture over 20 MB"); continue; }
+    chatPics.push({file:f, url:URL.createObjectURL(f)});
+  }
+  drawPics(); return true;
+}
+chatPicsEl.addEventListener("click", e => { const b = e.target.closest("[data-rm]"); if (!b) return; const [p] = chatPics.splice(Number(b.dataset.rm), 1); try { URL.revokeObjectURL(p.url); } catch (_) {} drawPics(); });
+$("#chatAttach").onclick = () => $("#chatFile").click();
+$("#chatFile").onchange = e => { addPics(e.target.files); e.target.value = ""; chatText.focus(); };
+chat.addEventListener("paste", e => { if (addPics(e.clipboardData && e.clipboardData.files)) e.preventDefault(); });
+document.addEventListener("paste", e => { if (chat.hidden || chat.contains(e.target)) return; if (addPics(e.clipboardData && e.clipboardData.files)) e.preventDefault(); });
+["dragenter","dragover"].forEach(t => chat.addEventListener(t, e => { e.preventDefault(); chat.classList.add("drag-over"); }));
+["dragleave","drop"].forEach(t => chat.addEventListener(t, e => { if (t === "dragleave" && chat.contains(e.relatedTarget)) return; chat.classList.remove("drag-over"); }));
+chat.addEventListener("drop", e => { e.preventDefault(); if (!addPics(e.dataTransfer && e.dataTransfer.files)) toast("Drop image files (PNG, JPEG or WEBP)"); });
+chatText.addEventListener("input", () => { chatText.style.height = "auto"; chatText.style.height = Math.min(chatText.scrollHeight, 120) + "px"; });
+chatText.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#chatForm").requestSubmit(); } });
+
+async function readAll(files, onDone){
+  const out = new Array(files.length); let next = 0;
+  const worker = async () => { while (next < files.length) { const i = next++; try { out[i] = {ok:true, got:await readPicture(files[i])}; } catch (e) { out[i] = {ok:false, msg:e.message || "Couldn't read that picture."}; } onDone(); } };
+  await Promise.all([worker(), worker(), worker()]);
+  return out;
+}
+function answer(pics, extra){
+  const rg = extra.ratioG || ratioG(), rr = extra.ratioR || ratioR();
+  const qty = {}; // item id -> count
+  pics.forEach(p => { if (p.ok) Object.entries(p.got).forEach(([n, v]) => { const it = BY_NAME[n]; if (it) qty[it.id] = (qty[it.id] || 0) + v; }); });
+  Object.entries(extra.items).forEach(([id, v]) => { qty[id] = (qty[id] || 0) + v; });
+  const rows = ITEMS.filter(it => qty[it.id] > 0);
+  const itemsG = rows.reduce((a, it) => a + qty[it.id] * it.price, 0);
+  const totalG = itemsG + extra.gralats, troG = totalG / rg, troR = extra.rocks / rr;
+  let h = `<span class="who">Trade Stand</span>`;
+  if (pics.length) h += `<div class="sub">${pics.map((p, i) => p.ok ? `Picture ${i + 1}: ${Object.keys(p.got).length ? Object.entries(p.got).map(([n, v]) => `${fmt(v)} ${esc(n)}`).join(", ") : "no sellables found"}` : `Picture ${i + 1}: ${esc(p.msg)}`).join("<br>")}</div>`;
+  if (extra.tro && !rows.length && !extra.gralats && !extra.rocks) {
+    h += `<div class="tot"><span><b>${fmt(extra.tro)} Tro</b></span><span>= <b>${fmt(extra.tro * rg)}</b> gralats <span class="sub">at ${fmt(rg)}:1</span></span><span>= <b>${fmt(extra.tro * rr)}</b> rocks <span class="sub">at ${fmt(rr)}:1</span></span></div>`;
+    return {html:h, qty:null, summary:`${fmt(extra.tro)} Tro = ${fmt(extra.tro * rg)} gralats (${fmt(rg)}:1) or ${fmt(extra.tro * rr)} rocks (${fmt(rr)}:1)`};
+  }
+  if (!rows.length && !extra.gralats && !extra.rocks) {
+    h += pics.some(p => p.ok) ? `<div>I didn't find any sellables to price.</div>` : (pics.length ? "" : `<div>Send a screenshot, or type something like "1,418 mushrooms and 40k gralats".</div>`);
+    if (extra.unknown.length) h += `<div class="sub">I didn't recognise: ${esc(extra.unknown.slice(0, 6).join(", "))}</div>`;
+    return {html:h, qty:null, summary:""};
+  }
+  h += `<ul>${rows.map(it => `<li><span>${fmt(qty[it.id])} ${esc(it.name)} <span class="sub">× ${it.price}</span></span><span>${fmt(qty[it.id] * it.price)} g</span></li>`).join("")}${extra.gralats ? `<li><span>Gralats you have</span><span>${fmt(extra.gralats)} g</span></li>` : ""}</ul>`;
+  h += `<div class="tot">`;
+  if (totalG) h += `<span>Gralats: <b>${fmt(totalG)}</b></span><span>Tro: <b class="tro">${fmt(troG)}</b> <span class="sub">at ${fmt(rg)}:1</span></span>`;
+  if (extra.rocks) h += `<span>${fmt(extra.rocks)} rocks → <b class="tro">${fmt(troR)}</b> Tro <span class="sub">at ${fmt(rr)}:1</span></span>`;
+  if (totalG && extra.rocks) h += `<span>All together: <b class="tro">${fmt(troG + troR)} Tro</b></span>`;
+  h += `</div>`;
+  if (extra.unknown.length) h += `<div class="sub">I didn't recognise: ${esc(extra.unknown.slice(0, 6).join(", "))}</div>`;
+  const summary = [rows.map(it => `${fmt(qty[it.id])} ${it.name}`).join(", "), totalG ? `= ${fmt(totalG)} gralats = ${fmt(troG)} Tro (${fmt(rg)}:1)` : "", extra.rocks ? `${fmt(extra.rocks)} rocks = ${fmt(troR)} Tro (${fmt(rr)}:1)` : ""].filter(Boolean).join(" ");
+  return {html:h, qty:rows.length ? qty : null, summary};
+}
+$("#chatForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (chatBusy) return;
+  const text = chatText.value.trim(), pics = chatPics.slice();
+  if (!text && !pics.length) return;
+  if (/^(clear|reset)$/i.test(text) && !pics.length) { chatLog.innerHTML = ""; chatGreeted = false; greet(); chatText.value = ""; return; }
+  if (pics.length) {
+    if (!sample && !remote) { chatMsg("bot err", `<span class="who">Trade Stand</span>Screenshot reading isn't available here. Type your loot instead.`); return; }
+    const gate = readAllowed(pics.length); if (!gate.ok) { chatMsg("bot err", `<span class="who">Trade Stand</span>${esc(gate.msg)}`); return; }
+  }
+  chatPics = []; drawPics(); chatText.value = ""; chatText.style.height = "";
+  chatMsg("me", `${pics.length ? `<div class="thumbs">${pics.map((p, i) => `<img src="${p.url}" alt="Picture ${i + 1}">`).join("")}</div>` : ""}${esc(text)}`);
+  const extra = parseText(text);
+  let results = [];
+  if (pics.length) {
+    chatBusy = true; $("#chatSend").disabled = true;
+    let done = 0; const wait = chatMsg("bot typing", `<span class="who">Trade Stand</span>Reading ${pics.length} picture${pics.length > 1 ? "s" : ""}`);
+    results = await readAll(pics.map(p => p.file), () => { done++; if (pics.length > 1) wait.innerHTML = `<span class="who">Trade Stand</span>Read ${done} of ${pics.length}`; });
+    wait.remove(); chatBusy = false; $("#chatSend").disabled = false;
+  }
+  const a = answer(results, extra);
+  const m = chatMsg("bot" + (results.length && results.every(r => !r.ok) ? " err" : ""), a.html);
+  if (a.qty || a.summary) {
+    const acts = document.createElement("div"); acts.className = "acts";
+    if (a.qty) { const b = document.createElement("button"); b.type = "button"; b.className = "btn"; b.textContent = "Put in bag";
+      b.onclick = () => { ITEMS.forEach(it => { const v = a.qty[it.id] ? String(Math.min(999999, Math.round(a.qty[it.id]))) : ""; S.qty[it.id] = v; $("#q-" + it.id).value = v; }); refreshBag(true); toast("Bag filled from the chat"); }; acts.append(b); }
+    if (a.summary) { const c = document.createElement("button"); c.type = "button"; c.className = "btn"; c.textContent = "Copy"; c.onclick = () => copyText(a.summary, "Copied the total"); acts.append(c); }
+    m.append(acts); chatLog.scrollTop = chatLog.scrollHeight;
+  }
+});
 
 
 /* ---------- movable windows ---------- */

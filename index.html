@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-title" content="Trade Stand">
 <link rel="preload" href="assets/fonts/pixelify-sans-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/pixelify-sans-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=10ac25ebc4">
+<link rel="stylesheet" href="css/style.css?v=40a81d3619">
 </head>
 <body>
 <header class="town">
@@ -122,6 +122,26 @@
   </div>
 </main>
 
+<button class="btn chat-fab" id="chatFab" type="button" aria-controls="chat" aria-expanded="false" hidden>
+  <img src="assets/ui/gralat.png" alt="" width="28" height="28"><span>Trade Chat</span>
+</button>
+<section class="chat" id="chat" aria-labelledby="chatTitle" hidden>
+  <div class="plank chat-head">
+    <h2 id="chatTitle">Trade Chat<small>Send screenshots, get gralats and Tro</small></h2>
+    <button class="btn chat-x" id="chatClose" type="button" aria-label="Close Trade Chat">✕</button>
+  </div>
+  <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
+  <form class="chat-form" id="chatForm" autocomplete="off">
+    <div class="chat-pics" id="chatPics" hidden></div>
+    <div class="chat-row">
+      <button class="btn chat-attach" id="chatAttach" type="button" aria-label="Add pictures" title="Add pictures">+</button>
+      <input type="file" id="chatFile" accept="image/png,image/jpeg,image/webp" multiple hidden>
+      <label class="well chat-in"><span class="sr">Message</span><textarea id="chatText" rows="1" maxlength="600" placeholder="Paste pictures or type…"></textarea></label>
+      <button class="btn chat-send" id="chatSend" type="submit">Send</button>
+    </div>
+  </form>
+</section>
+
 <footer><div class="turf" aria-hidden="true"></div>
   <div class="wrap">
     <span>Art from the GraalOnline Era and Classic game files. Aerolatas icon by <a href="https://graalguide.com" target="_blank" rel="noopener">GraalGuide.com</a>.</span>
@@ -129,6 +149,6 @@
   </div>
 </footer>
 <div class="toast" id="toast" role="status"></div>
-<script src="app.js?v=f99110c037" defer></script>
+<script src="app.js?v=42bdb86b6e" defer></script>
 </body>
 </html>
