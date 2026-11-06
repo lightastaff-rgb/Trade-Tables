@@ -264,6 +264,41 @@ img{image-rendering:pixelated}
 @media (prefers-reduced-motion:reduce){.chat,.row,.chat-fab .face,.dots i{animation:none}}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
+/* ---------- resizable windows ---------- */
+.drag{container-type:inline-size}
+.grip{display:none}
+.stand.free .grip{display:block;position:absolute;right:-8px;bottom:-8px;width:22px;height:22px;z-index:3;cursor:ew-resize;touch-action:none;
+  background:
+    linear-gradient(#2B180C,#2B180C) 14px 4px/4px 4px no-repeat,
+    linear-gradient(#2B180C,#2B180C) 9px 9px/4px 4px no-repeat, linear-gradient(#2B180C,#2B180C) 14px 9px/4px 4px no-repeat,
+    linear-gradient(#2B180C,#2B180C) 4px 14px/4px 4px no-repeat, linear-gradient(#2B180C,#2B180C) 9px 14px/4px 4px no-repeat, linear-gradient(#2B180C,#2B180C) 14px 14px/4px 4px no-repeat}
+.stand.free .grip:hover,.drag.resizing .grip{filter:drop-shadow(0 0 0 var(--gold)) brightness(1.6)}
+.drag.resizing{outline:3px dashed var(--gold);outline-offset:4px}
+.size-tag{position:absolute;right:8px;bottom:-30px;font:400 17px/1 var(--tape);background:#2B180C;color:#FFD86B;padding:4px 7px;pointer-events:none;white-space:nowrap}
+
+/* converters and calculator shrink into a compact layout when their window is narrow */
+@container (max-width: 320px){
+  .conv,.calc{padding:10px;gap:8px}
+  .field label{font-size:13px;margin-bottom:3px}
+  .field input{font-size:20px;padding:6px 8px}
+  .field .unit{font-size:14px;padding:0 8px}
+  .plank h2{font-size:19px}
+  .plank h2 small{display:none}
+  .swaprow{font-size:13px;gap:6px}
+  .swap.btn{width:38px;min-height:34px}
+  .convert{min-height:38px;font-size:16px}
+  .said{font-size:15px;min-height:18px}
+  .screen{min-height:48px}.screen .num{font-size:30px}
+}
+@container (max-width: 250px){
+  .conv{padding:8px;gap:6px}
+  .field input{font-size:18px;padding:5px 6px}
+  .field .unit{display:none}
+  .swaprow span{display:none}
+  .convert{white-space:normal;font-size:15px;line-height:1.1;padding:6px 8px}
+  .said{font-size:14px}
+}
+
 /* ---------- stand counter ---------- */
 .counter{display:grid;gap:26px;grid-template-columns:minmax(0,1fr);min-width:0}
 .conv{padding:16px;display:grid;gap:12px;grid-template-columns:minmax(0,1fr)}

@@ -827,6 +827,44 @@ DRAG_IDS.forEach(id => {
   h.addEventListener("pointerup", end); h.addEventListener("pointercancel", end); h.addEventListener("lostpointercapture", end);
   h.addEventListener("click", e => { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
 });
+// Resize from the bottom-right corner (width), snapping the right edge to other windows.
+const MIN_W = {winBag:300, convG:200, convR:200, abacus:220, winReceipt:240};
+DRAG_IDS.forEach(id => {
+  const el = byId(id), grip = document.createElement("span");
+  grip.className = "grip"; grip.setAttribute("aria-hidden", "true"); grip.title = "Drag to resize";
+  el.append(grip);
+  let sx = 0, ow = 0, active = false, nw = 0, tag = null;
+  grip.addEventListener("pointerdown", e => {
+    if (!mqWide.matches || !current || e.button !== 0) return;
+    active = true; sx = e.clientX;
+    if (!S.layout) { S.layout = JSON.parse(JSON.stringify(current)); current = S.layout; }
+    ow = el.offsetWidth; nw = ow; el.style.zIndex = ++zTop; el.classList.add("resizing");
+    tag = document.createElement("span"); tag.className = "size-tag"; el.append(tag);
+    try { grip.setPointerCapture(e.pointerId); } catch (_) {}
+    e.preventDefault(); e.stopPropagation();
+  });
+  grip.addEventListener("pointermove", e => {
+    if (!active) return;
+    const W = stand.clientWidth, x = el.offsetLeft;
+    let w = Math.round((ow + e.clientX - sx) / 8) * 8;
+    if (!e.altKey) { // snap the right edge to other windows' edges and the page edge
+      let best = null;
+      const cand = [W - x];
+      DRAG_IDS.forEach(o => { if (o === id) return; const e2 = byId(o); if (!e2.offsetWidth) return; cand.push(e2.offsetLeft - x - GAP, e2.offsetLeft + e2.offsetWidth - x, e2.offsetWidth); });
+      const raw = ow + e.clientX - sx;
+      cand.forEach(c => { const d = Math.abs(c - raw); if (d <= SNAP && (!best || d < best.d)) best = {d, v:c}; });
+      if (best) w = Math.round(best.v);
+    }
+    nw = Math.max(MIN_W[id] || 200, Math.min(w, W - x));
+    el.style.width = nw + "px"; tag.textContent = nw + " px";
+    if (!hPending) { hPending = true; requestAnimationFrame(() => { hPending = false; standH(); }); }
+  });
+  const end = () => {
+    if (!active) return; active = false; el.classList.remove("resizing"); if (tag) { tag.remove(); tag = null; }
+    current[id].w = nw; save(); standH(); byId("resetLayout").hidden = false;
+  };
+  grip.addEventListener("pointerup", end); grip.addEventListener("pointercancel", end); grip.addEventListener("lostpointercapture", end);
+});
 if ("ResizeObserver" in window) { const ro = new ResizeObserver(() => { if (current) standH(); }); DRAG_IDS.forEach(id => ro.observe(byId(id))); }
 mqWide.addEventListener("change", () => { if (mqWide.matches) applyFree(); else exitFree(); });
 let rsT; window.addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => { if (mqWide.matches) applyFree(); }, 120); });
