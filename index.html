@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-title" content="Trade Stand">
 <link rel="preload" href="assets/fonts/pixelify-sans-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/pixelify-sans-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=9f103e5d6f">
+<link rel="stylesheet" href="css/style.css?v=64d3050602">
 </head>
 <body>
 <header class="town">
@@ -130,6 +130,11 @@
     <h2 id="chatTitle">Trade Chat<small>Send screenshots, get gralats and Tro</small></h2>
     <button class="btn chat-x" id="chatClose" type="button" aria-label="Close Trade Chat">✕</button>
   </div>
+  <div class="tally" id="tally" hidden>
+    <div class="tally-top"><span class="tally-k">Running total</span><span class="tally-n" id="tallyN"></span></div>
+    <div class="tally-sums"><span><img src="assets/ui/gralat.png" alt=""><b id="tallyG">0</b> gralats</span><span><img src="assets/ui/tro.png" alt=""><b id="tallyT">0</b> Tro</span></div>
+    <div class="tally-acts"><button class="btn" id="tallyBag" type="button">Put in bag</button><button class="btn" id="tallyCopy" type="button">Copy</button><button class="btn" id="tallyReset" type="button">Start over</button></div>
+  </div>
   <div class="chat-log" id="chatLog" role="log" aria-live="polite"></div>
   <form class="chat-form" id="chatForm" autocomplete="off">
     <div class="chat-pics" id="chatPics" hidden></div>
@@ -149,6 +154,6 @@
   </div>
 </footer>
 <div class="toast" id="toast" role="status"></div>
-<script src="app.js?v=92767c873f" defer></script>
+<script src="app.js?v=42745084ca" defer></script>
 </body>
 </html>

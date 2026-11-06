@@ -503,7 +503,7 @@ function useRemoteReader(){ if (sample) return; remote = true; showReader(); $("
 
 /* ---------- Trade Chat: send screenshots, get gralats and Tro ---------- */
 const chat = $("#chat"), chatLog = $("#chatLog"), chatText = $("#chatText"), chatPicsEl = $("#chatPics");
-const MAX_PICS = 6;
+const MAX_PICS = 20;
 let chatPics = [], chatBusy = false, chatGreeted = false;
 const BY_NAME = Object.fromEntries(ITEMS.map(i => [i.name, i]));
 // words people type -> item id ("gralats", "rocks" and "tro" are money, not items)
@@ -567,7 +567,7 @@ function chatMsg(cls, html){
 function greet(){
   if (chatGreeted) return; chatGreeted = true;
   const live = sample || remote;
-  const m = chatMsg("bot", `<span class="who">Shopkeeper</span>${live ? `Howdy! Toss me your inventory or trade screenshots, up to ${MAX_PICS} at once. Paste them (Ctrl+V), drop them here or tap <b>+</b>, and I'll tally the gralats and Tro.` : "Screenshot reading isn't available here, but you can type your loot and I'll tally it."}<div class="tips"><button type="button">1,418 mushrooms and 40k gralats</button><button type="button">300 rocks at 1.5</button><button type="button">500 tro</button></div>`);
+  const m = chatMsg("bot", `<span class="who">Shopkeeper</span>${live ? `Howdy! Toss me your inventory or trade screenshots, up to ${MAX_PICS} at once, and keep sending more. I'll keep a running total of the gralats and Tro at the top until you press <b>Start over</b>. Paste (Ctrl+V), drop them here or tap <b>+</b>.` : "Screenshot reading isn't available here, but you can type your loot and I'll tally it."}<div class="tips"><button type="button">1,418 mushrooms and 40k gralats</button><button type="button">300 rocks at 1.5</button><button type="button">500 tro</button></div>`);
   m.querySelectorAll(".tips button").forEach(b => b.onclick = () => { chatText.value = b.textContent; chatText.focus(); });
 }
 function openChat(){ chat.hidden = false; $("#chatFab").setAttribute("aria-expanded", "true"); $("#chatFab").hidden = true; greet(); setTimeout(() => chatText.focus(), 0); }
@@ -586,6 +586,7 @@ function addPics(files){
   for (const f of imgs) {
     if (chatPics.length >= MAX_PICS) { toast(`Up to ${MAX_PICS} pictures per message`); break; }
     if (f.size > 20 * 1024 * 1024) { toast("Skipped a picture over 20 MB"); continue; }
+    if (chatPics.some(p => p.file.size === f.size && p.file.lastModified === f.lastModified && p.file.name === f.name)) continue;
     chatPics.push({file:f, url:URL.createObjectURL(f)});
   }
   drawPics(); return true;
@@ -607,10 +608,37 @@ async function readAll(files, onDone){
   await Promise.all([worker(), worker(), worker()]);
   return out;
 }
+// Running total across every message until "Start over".
+const tally = {qty:{}, gralats:0, rocks:0, pics:0, sigs:new Set(), rg:null, rr:null};
+const sigOf = got => JSON.stringify(Object.entries(got).sort());
+function tallyAdd(a, extra, pics){
+  if (!a.qty && !extra.gralats && !extra.rocks) return;
+  Object.entries(a.qty || {}).forEach(([id, v]) => { tally.qty[id] = (tally.qty[id] || 0) + v; });
+  tally.gralats += extra.gralats; tally.rocks += extra.rocks; tally.pics += pics;
+  if (extra.ratioG) tally.rg = extra.ratioG; if (extra.ratioR) tally.rr = extra.ratioR;
+  drawTally(true);
+}
+function tallyNumbers(){
+  const rg = tally.rg || ratioG(), rr = tally.rr || ratioR();
+  const g = ITEMS.reduce((a, it) => a + (tally.qty[it.id] || 0) * it.price, 0) + tally.gralats;
+  return {rg, rr, g, tro: g / rg + tally.rocks / rr};
+}
+function drawTally(bump){
+  const el = $("#tally"), any = Object.keys(tally.qty).length || tally.gralats || tally.rocks;
+  el.hidden = !any; if (!any) return;
+  const t = tallyNumbers(), items = Object.keys(tally.qty).length;
+  $("#tallyG").textContent = fmt(t.g); $("#tallyT").textContent = fmt(t.tro);
+  $("#tallyN").textContent = [tally.pics ? `${tally.pics} picture${tally.pics > 1 ? "s" : ""}` : "", items ? `${items} item type${items > 1 ? "s" : ""}` : "", tally.rocks ? `${fmt(tally.rocks)} rocks` : ""].filter(Boolean).join(" · ");
+  if (bump) { el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+}
+function tallyReset(){ tally.qty = {}; tally.gralats = 0; tally.rocks = 0; tally.pics = 0; tally.sigs = new Set(); tally.rg = tally.rr = null; drawTally(); }
+$("#tallyReset").onclick = () => { tallyReset(); chatMsg("bot", `<span class="who">Shopkeeper</span>Fresh page! Send your next screenshots.`); };
+$("#tallyBag").onclick = () => { ITEMS.forEach(it => { const v = tally.qty[it.id] ? String(Math.min(999999, Math.round(tally.qty[it.id]))) : ""; S.qty[it.id] = v; $("#q-" + it.id).value = v; }); refreshBag(true); toast("Bag filled with the running total"); };
+$("#tallyCopy").onclick = () => { const t = tallyNumbers(); copyText(`${ITEMS.filter(it => tally.qty[it.id]).map(it => `${fmt(tally.qty[it.id])} ${it.name}`).join(", ")}${tally.gralats ? ` + ${fmt(tally.gralats)} gralats` : ""}${tally.rocks ? ` + ${fmt(tally.rocks)} rocks` : ""} = ${fmt(t.g)} gralats = ${fmt(t.tro)} Tro`, "Copied the running total"); };
 function answer(pics, extra){
   const rg = extra.ratioG || ratioG(), rr = extra.ratioR || ratioR();
   const qty = {};
-  pics.forEach(p => { if (p.ok) Object.entries(p.got).forEach(([n, v]) => { const it = BY_NAME[n]; if (it) qty[it.id] = (qty[it.id] || 0) + v; }); });
+  pics.forEach(p => { if (p.ok && !p.dup) Object.entries(p.got).forEach(([n, v]) => { const it = BY_NAME[n]; if (it) qty[it.id] = (qty[it.id] || 0) + v; }); });
   Object.entries(extra.items).forEach(([id, v]) => { qty[id] = (qty[id] || 0) + v; });
   const rows = ITEMS.filter(it => qty[it.id] > 0);
   const itemsG = rows.reduce((a, it) => a + qty[it.id] * it.price, 0);
@@ -619,6 +647,7 @@ function answer(pics, extra){
   let h = `<span class="who">Shopkeeper</span>`;
   if (pics.length) h += `<div class="chips">${pics.map((p, i) => {
     const n = p.ok ? Object.keys(p.got).length : 0;
+    if (p.dup) return `<span class="chip dup" title="Same counts as a picture already counted">Pic ${i + 1} · already counted</span>`;
     return p.ok ? `<span class="chip ok" title="${esc(Object.entries(p.got).map(([k, v]) => fmt(v) + " " + k).join(", "))}">Pic ${i + 1} · ${n ? n + " item" + (n > 1 ? "s" : "") : "nothing to sell"}</span>`
                 : `<span class="chip bad" title="${esc(p.msg)}">Pic ${i + 1} · ${esc(p.msg.length > 38 ? "couldn't read" : p.msg)}</span>`;
   }).join("")}</div>`;
@@ -650,7 +679,7 @@ $("#chatForm").addEventListener("submit", async e => {
   if (chatBusy) return;
   const text = chatText.value.trim(), pics = chatPics.slice();
   if (!text && !pics.length) return;
-  if (/^(clear|reset)$/i.test(text) && !pics.length) { chatLog.innerHTML = ""; chatGreeted = false; greet(); chatText.value = ""; return; }
+  if (/^(clear|reset|start over)$/i.test(text) && !pics.length) { chatLog.innerHTML = ""; tallyReset(); chatGreeted = false; greet(); chatText.value = ""; return; }
   if (pics.length) {
     if (!sample && !remote) { chatMsg("bot err", `<span class="who">Shopkeeper</span>Screenshot reading isn't available here. Type your loot instead.`); return; }
     const gate = readAllowed(pics.length); if (!gate.ok) { chatMsg("bot err", `<span class="who">Shopkeeper</span>${esc(gate.msg)}`); return; }
@@ -665,7 +694,9 @@ $("#chatForm").addEventListener("submit", async e => {
     results = await readAll(pics.map(p => p.file), () => { done++; if (pics.length > 1) wait.innerHTML = `<span class="who">Shopkeeper</span>Read ${done} of ${pics.length}<span class="dots"><i></i><i></i><i></i></span>`; });
     wait.remove(); chatBusy = false; $("#chatSend").disabled = false;
   }
+  results.forEach(r => { if (!r.ok || !Object.keys(r.got).length) return; const sg = sigOf(r.got); if (tally.sigs.has(sg)) r.dup = true; else tally.sigs.add(sg); });
   const a = answer(results, extra);
+  tallyAdd(a, extra, results.filter(r => r.ok && !r.dup).length);
   const m = chatMsg("bot" + (results.length && results.every(r => !r.ok) ? " err" : ""), a.html);
   if (a.qty || a.summary) {
     const acts = document.createElement("div"); acts.className = "acts";

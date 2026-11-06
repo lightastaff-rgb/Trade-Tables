@@ -165,6 +165,20 @@ img{image-rendering:pixelated}
 .shelf.compact .val{grid-column:auto;font-size:14px;white-space:nowrap}
 @media (max-width:420px){.shelf.compact .slot{grid-template-columns:28px minmax(0,1fr) 80px;gap:8px}.shelf.compact .slot .pic,.shelf.compact .slot .pic img{width:28px;height:28px}.shelf.compact .val{display:none}}
 /* ---------- Trade Chat ---------- */
+.tally{padding:8px 12px 10px;background:#2B180C;color:#F5E7C9;display:grid;gap:6px;border-bottom:4px solid #1a0e06}
+.tally[hidden]{display:none!important}
+.tally-top{display:flex;justify-content:space-between;align-items:baseline;font:700 13px/1 var(--font);letter-spacing:1.5px;text-transform:uppercase}
+.tally-n{font:400 17px/1 var(--tape);letter-spacing:0;text-transform:none;color:#D9C29A}
+.tally-sums{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 18px/1 var(--tape);color:#D9C29A}
+.tally-sums span{display:flex;align-items:center;gap:6px}
+.tally-sums img{width:22px;height:auto;image-rendering:pixelated}
+.tally-sums b{font:700 22px/1 var(--font);color:#FFD86B;font-variant-numeric:tabular-nums}
+.tally-acts{display:flex;flex-wrap:wrap;gap:6px}
+.tally-acts .btn{min-height:30px;padding:3px 11px;font-size:14px}
+.tally.bump{animation:bump .3s steps(3)}
+@keyframes bump{50%{background:#4a2a12}}
+.chip.dup{opacity:.75}
+.chip.dup::before{content:"= ";font-weight:700}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .chat-fab{position:fixed;z-index:60;right:max(16px, env(safe-area-inset-right, 0px));bottom:calc(16px + env(safe-area-inset-bottom, 0px));
   display:flex;align-items:flex-end;gap:10px;padding:6px 18px 8px 8px;font-size:19px;box-shadow:0 6px 0 rgba(0,0,0,.25)}
