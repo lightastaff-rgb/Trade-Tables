@@ -16,9 +16,11 @@ const SPRITES={aerolatas:"assets/items/aerolatas.png",bones:"assets/items/bones.
     <div class="conv">
       <div class="field"><label for="${t}-top" id="${t}-topL"></label>
         <div class="well"><input id="${t}-top" type="number" inputmode="decimal" placeholder="0"><span class="unit" id="${t}-topU"></span></div></div>
-      <div class="field"><label for="${t}-ratio">Ratio</label>
-        <div class="well"><input id="${t}-ratio" type="number" inputmode="decimal" step="0.01"><span class="unit">: 1</span></div></div>
-      <div class="swaprow"><button class="swap btn" type="button" id="${t}-swap" aria-label="Switch direction">${swapIcon}</button><span id="${t}-dir"></span></div>
+      <div class="ratio-row">
+        <div class="field ratio"><label for="${t}-ratio">Ratio</label>
+          <div class="well"><input id="${t}-ratio" type="number" inputmode="decimal" step="0.01"><span class="unit">: 1</span></div></div>
+        <div class="swaprow"><button class="swap btn" type="button" id="${t}-swap" aria-label="Switch direction">${swapIcon}</button><span id="${t}-dir"></span></div>
+      </div>
       <div class="field out"><label for="${t}-out" id="${t}-outL"></label>
         <div class="well"><input id="${t}-out" type="text" readonly placeholder="0" tabindex="-1"><span class="unit" id="${t}-outU"></span></div></div>
       <button class="btn go convert" type="button" id="${t}-go"></button>

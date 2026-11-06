@@ -182,9 +182,11 @@ function makeConverter(key, el, cfg){
     <div class="conv">
       <div class="field"><label for="${key}-top" id="${key}-topL"></label>
         <div class="well"><input id="${key}-top" type="number" inputmode="decimal" placeholder="0"><span class="unit" id="${key}-topU"></span></div></div>
-      <div class="field"><label for="${key}-ratio">Ratio</label>
-        <div class="well"><input id="${key}-ratio" type="number" inputmode="decimal" step="0.01"><span class="unit">: 1</span></div></div>
-      <div class="swaprow"><button class="swap btn" type="button" id="${key}-swap" aria-label="Switch direction">${swapIcon}</button><span id="${key}-dir"></span></div>
+      <div class="ratio-row">
+        <div class="field ratio"><label for="${key}-ratio">Ratio</label>
+          <div class="well"><input id="${key}-ratio" type="number" inputmode="decimal" step="0.01"><span class="unit">: 1</span></div></div>
+        <div class="swaprow"><button class="swap btn" type="button" id="${key}-swap" aria-label="Switch direction">${swapIcon}</button><span id="${key}-dir"></span></div>
+      </div>
       <div class="field out"><label for="${key}-out" id="${key}-outL"></label>
         <div class="well"><input id="${key}-out" type="text" readonly placeholder="0" tabindex="-1"><span class="unit" id="${key}-outU"></span></div></div>
       <button class="btn go convert" type="button" id="${key}-go"></button>
