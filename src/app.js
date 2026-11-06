@@ -556,13 +556,19 @@ const ratioG = () => { const n = num(S.conv.g.ratio); return n > 0 ? n : 2; };
 const ratioR = () => { const n = num(S.conv.r.ratio); return n > 0 ? n : 1.3; };
 
 function chatMsg(cls, html){
-  const d = document.createElement("div"); d.className = "msg " + cls; d.innerHTML = html;
-  chatLog.append(d); chatLog.scrollTop = chatLog.scrollHeight; return d;
+  const mine = /\bme\b/.test(cls);
+  const row = document.createElement("div"); row.className = "row " + (mine ? "me" : "bot");
+  if (!mine) { const av = document.createElement("img"); av.className = "av"; av.src = KEEPER; av.alt = ""; row.append(av); }
+  const d = document.createElement("div"); d.className = "msg " + cls.replace(/\b(bot|me)\b/g, "").trim(); d.innerHTML = html;
+  row.append(d); chatLog.append(row); chatLog.scrollTop = chatLog.scrollHeight;
+  d.remove = () => row.remove();
+  return d;
 }
 function greet(){
   if (chatGreeted) return; chatGreeted = true;
   const live = sample || remote;
-  chatMsg("bot", `<span class="who">Trade Stand</span>${live ? "Send me inventory or trade screenshots, up to " + MAX_PICS + " at once. Paste them here (Ctrl+V), drop them in, or tap +. I'll add everything up into gralats and Tro." : "Screenshot reading isn't available here, but you can type your loot."}<br><span class="sub">You can also type extras, like "plus 40k gralats", "500 rocks", or "at 2.5" to change the gralat ratio.</span>`);
+  const m = chatMsg("bot", `<span class="who">Shopkeeper</span>${live ? `Howdy! Toss me your inventory or trade screenshots, up to ${MAX_PICS} at once. Paste them (Ctrl+V), drop them here or tap <b>+</b>, and I'll tally the gralats and Tro.` : "Screenshot reading isn't available here, but you can type your loot and I'll tally it."}<div class="tips"><button type="button">1,418 mushrooms and 40k gralats</button><button type="button">300 rocks at 1.5</button><button type="button">500 tro</button></div>`);
+  m.querySelectorAll(".tips button").forEach(b => b.onclick = () => { chatText.value = b.textContent; chatText.focus(); });
 }
 function openChat(){ chat.hidden = false; $("#chatFab").setAttribute("aria-expanded", "true"); $("#chatFab").hidden = true; greet(); setTimeout(() => chatText.focus(), 0); }
 function closeChat(){ chat.hidden = true; $("#chatFab").hidden = false; $("#chatFab").setAttribute("aria-expanded", "false"); $("#chatFab").focus(); }
@@ -603,32 +609,41 @@ async function readAll(files, onDone){
 }
 function answer(pics, extra){
   const rg = extra.ratioG || ratioG(), rr = extra.ratioR || ratioR();
-  const qty = {}; // item id -> count
+  const qty = {};
   pics.forEach(p => { if (p.ok) Object.entries(p.got).forEach(([n, v]) => { const it = BY_NAME[n]; if (it) qty[it.id] = (qty[it.id] || 0) + v; }); });
   Object.entries(extra.items).forEach(([id, v]) => { qty[id] = (qty[id] || 0) + v; });
   const rows = ITEMS.filter(it => qty[it.id] > 0);
   const itemsG = rows.reduce((a, it) => a + qty[it.id] * it.price, 0);
   const totalG = itemsG + extra.gralats, troG = totalG / rg, troR = extra.rocks / rr;
-  let h = `<span class="who">Trade Stand</span>`;
-  if (pics.length) h += `<div class="sub">${pics.map((p, i) => p.ok ? `Picture ${i + 1}: ${Object.keys(p.got).length ? Object.entries(p.got).map(([n, v]) => `${fmt(v)} ${esc(n)}`).join(", ") : "no sellables found"}` : `Picture ${i + 1}: ${esc(p.msg)}`).join("<br>")}</div>`;
+  const G = "assets/ui/gralat.png";
+  let h = `<span class="who">Shopkeeper</span>`;
+  if (pics.length) h += `<div class="chips">${pics.map((p, i) => {
+    const n = p.ok ? Object.keys(p.got).length : 0;
+    return p.ok ? `<span class="chip ok" title="${esc(Object.entries(p.got).map(([k, v]) => fmt(v) + " " + k).join(", "))}">Pic ${i + 1} · ${n ? n + " item" + (n > 1 ? "s" : "") : "nothing to sell"}</span>`
+                : `<span class="chip bad" title="${esc(p.msg)}">Pic ${i + 1} · ${esc(p.msg.length > 38 ? "couldn't read" : p.msg)}</span>`;
+  }).join("")}</div>`;
+  const unknown = extra.unknown.length ? `<div class="sub" style="margin-top:6px">I didn't recognise: ${esc(extra.unknown.slice(0, 6).join(", "))}</div>` : "";
   if (extra.tro && !rows.length && !extra.gralats && !extra.rocks) {
-    h += `<div class="tot"><span><b>${fmt(extra.tro)} Tro</b></span><span>= <b>${fmt(extra.tro * rg)}</b> gralats <span class="sub">at ${fmt(rg)}:1</span></span><span>= <b>${fmt(extra.tro * rr)}</b> rocks <span class="sub">at ${fmt(rr)}:1</span></span></div>`;
-    return {html:h, qty:null, summary:`${fmt(extra.tro)} Tro = ${fmt(extra.tro * rg)} gralats (${fmt(rg)}:1) or ${fmt(extra.tro * rr)} rocks (${fmt(rr)}:1)`};
+    h += `<div class="slip"><div class="slip-h">TRO PRICE<span>${fmt(extra.tro)} Tro</span></div><div class="sums">
+      <div class="sum"><img src="${G}" alt=""><b>${fmt(extra.tro * rg)}</b> gralats · ${fmt(rg)}:1</div>
+      <div class="sum"><img src="${TRO_IMG}" alt=""><b>${fmt(extra.tro * rr)}</b> rocks · ${fmt(rr)}:1</div></div></div>`;
+    return {html:h + unknown, qty:null, summary:`${fmt(extra.tro)} Tro = ${fmt(extra.tro * rg)} gralats (${fmt(rg)}:1) or ${fmt(extra.tro * rr)} rocks (${fmt(rr)}:1)`};
   }
   if (!rows.length && !extra.gralats && !extra.rocks) {
-    h += pics.some(p => p.ok) ? `<div>I didn't find any sellables to price.</div>` : (pics.length ? "" : `<div>Send a screenshot, or type something like "1,418 mushrooms and 40k gralats".</div>`);
-    if (extra.unknown.length) h += `<div class="sub">I didn't recognise: ${esc(extra.unknown.slice(0, 6).join(", "))}</div>`;
-    return {html:h, qty:null, summary:""};
+    h += pics.some(p => p.ok) ? `I looked, but didn't spot anything I buy.` : (pics.length ? `I couldn't read those. Try a clearer, closer screenshot.` : `Send a screenshot, or type something like "1,418 mushrooms and 40k gralats".`);
+    return {html:h + unknown, qty:null, summary:""};
   }
-  h += `<ul>${rows.map(it => `<li><span>${fmt(qty[it.id])} ${esc(it.name)} <span class="sub">× ${it.price}</span></span><span>${fmt(qty[it.id] * it.price)} g</span></li>`).join("")}${extra.gralats ? `<li><span>Gralats you have</span><span>${fmt(extra.gralats)} g</span></li>` : ""}</ul>`;
-  h += `<div class="tot">`;
-  if (totalG) h += `<span>Gralats: <b>${fmt(totalG)}</b></span><span>Tro: <b class="tro">${fmt(troG)}</b> <span class="sub">at ${fmt(rg)}:1</span></span>`;
-  if (extra.rocks) h += `<span>${fmt(extra.rocks)} rocks → <b class="tro">${fmt(troR)}</b> Tro <span class="sub">at ${fmt(rr)}:1</span></span>`;
-  if (totalG && extra.rocks) h += `<span>All together: <b class="tro">${fmt(troG + troR)} Tro</b></span>`;
-  h += `</div>`;
-  if (extra.unknown.length) h += `<div class="sub">I didn't recognise: ${esc(extra.unknown.slice(0, 6).join(", "))}</div>`;
+  const line = (img, name, mult, val) => `<li>${img ? `<img src="${img}" alt="">` : "<span></span>"}<span class="n">${name}${mult ? ` <small>× ${mult}</small>` : ""}</span><span class="v">${val}</span></li>`;
+  h += `<div class="slip"><div class="slip-h">TRADE SLIP<span>${new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}</span></div><ul class="lines">`
+    + rows.map(it => line(SPRITES[it.id], `${fmt(qty[it.id])} ${esc(it.name)}`, it.price, `${fmt(qty[it.id] * it.price)} g`)).join("")
+    + (extra.gralats ? line(G, "Gralats on hand", "", `${fmt(extra.gralats)} g`) : "")
+    + (extra.rocks ? line(SPRITES.ores, `${fmt(extra.rocks)} rocks`, "", `÷ ${fmt(rr)}`) : "")
+    + `</ul><div class="sums">`;
+  if (totalG) h += `<div class="sum"><img src="${G}" alt=""><b>${fmt(totalG)}</b> gralats</div><div class="sum t"><img src="${TRO_IMG}" alt=""><b>${fmt(troG)}</b> Tro · ${fmt(rg)}:1</div>`;
+  if (extra.rocks) h += `<div class="sum t"><img src="${TRO_IMG}" alt=""><b>${fmt(troR)}</b> Tro from rocks · ${fmt(rr)}:1</div>`;
+  h += `<div class="sum all"><span>YOU GET</span><b>${fmt(troG + troR)} Tro</b></div></div></div>`;
   const summary = [rows.map(it => `${fmt(qty[it.id])} ${it.name}`).join(", "), totalG ? `= ${fmt(totalG)} gralats = ${fmt(troG)} Tro (${fmt(rg)}:1)` : "", extra.rocks ? `${fmt(extra.rocks)} rocks = ${fmt(troR)} Tro (${fmt(rr)}:1)` : ""].filter(Boolean).join(" ");
-  return {html:h, qty:rows.length ? qty : null, summary};
+  return {html:h + unknown, qty:rows.length ? qty : null, summary};
 }
 $("#chatForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -637,8 +652,8 @@ $("#chatForm").addEventListener("submit", async e => {
   if (!text && !pics.length) return;
   if (/^(clear|reset)$/i.test(text) && !pics.length) { chatLog.innerHTML = ""; chatGreeted = false; greet(); chatText.value = ""; return; }
   if (pics.length) {
-    if (!sample && !remote) { chatMsg("bot err", `<span class="who">Trade Stand</span>Screenshot reading isn't available here. Type your loot instead.`); return; }
-    const gate = readAllowed(pics.length); if (!gate.ok) { chatMsg("bot err", `<span class="who">Trade Stand</span>${esc(gate.msg)}`); return; }
+    if (!sample && !remote) { chatMsg("bot err", `<span class="who">Shopkeeper</span>Screenshot reading isn't available here. Type your loot instead.`); return; }
+    const gate = readAllowed(pics.length); if (!gate.ok) { chatMsg("bot err", `<span class="who">Shopkeeper</span>${esc(gate.msg)}`); return; }
   }
   chatPics = []; drawPics(); chatText.value = ""; chatText.style.height = "";
   chatMsg("me", `${pics.length ? `<div class="thumbs">${pics.map((p, i) => `<img src="${p.url}" alt="Picture ${i + 1}">`).join("")}</div>` : ""}${esc(text)}`);
@@ -646,8 +661,8 @@ $("#chatForm").addEventListener("submit", async e => {
   let results = [];
   if (pics.length) {
     chatBusy = true; $("#chatSend").disabled = true;
-    let done = 0; const wait = chatMsg("bot typing", `<span class="who">Trade Stand</span>Reading ${pics.length} picture${pics.length > 1 ? "s" : ""}`);
-    results = await readAll(pics.map(p => p.file), () => { done++; if (pics.length > 1) wait.innerHTML = `<span class="who">Trade Stand</span>Read ${done} of ${pics.length}`; });
+    let done = 0; const wait = chatMsg("bot", `<span class="who">Shopkeeper</span>Reading ${pics.length} picture${pics.length > 1 ? "s" : ""}<span class="dots"><i></i><i></i><i></i></span>`);
+    results = await readAll(pics.map(p => p.file), () => { done++; if (pics.length > 1) wait.innerHTML = `<span class="who">Shopkeeper</span>Read ${done} of ${pics.length}<span class="dots"><i></i><i></i><i></i></span>`; });
     wait.remove(); chatBusy = false; $("#chatSend").disabled = false;
   }
   const a = answer(results, extra);
