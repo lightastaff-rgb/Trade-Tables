@@ -202,7 +202,7 @@ function makeConverter(key, el, cfg){
     el.querySelector(`#${key}-topU`).textContent = a;
     el.querySelector(`#${key}-outU`).textContent = b;
     el.querySelector(`#${key}-dir`).textContent = `${a} → ${b}`;
-    el.querySelector(`#${key}-go`).textContent = `Convert ${a} to ${b}`;
+    { const go = el.querySelector(`#${key}-go`); go.textContent = "Convert"; go.setAttribute("aria-label", `Convert ${a} to ${b}`); }
   };
   const convert = () => {
     const r = num(ratio.value); const a = num(top.value);

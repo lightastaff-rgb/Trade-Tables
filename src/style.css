@@ -284,7 +284,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   .field .unit{font-size:14px;padding:0 8px}
   .plank h2{font-size:19px}
   .plank h2 small{display:none}
-  .conv .ratio-row .swaprow span{display:none}
   .convert{min-height:38px;font-size:16px}
   .said{font-size:15px;min-height:18px}
   .screen{min-height:48px}.screen .num{font-size:30px}
@@ -298,19 +297,30 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   .said{font-size:14px}
 }
 
-/* compact converters: smaller boxes, ratio and switch on one line */
-.conv{padding:10px 12px 12px;gap:8px}
-.conv .field label{font-size:13px;margin-bottom:3px}
-.conv .field input{font-size:20px;padding:5px 9px}
-.conv .field .unit{font-size:14px;padding:0 9px}
-.conv .ratio-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
-.conv .ratio-row .swaprow{flex-direction:column;align-items:stretch;gap:3px;font-size:12px}
-.conv .ratio-row .swaprow::before,.conv .ratio-row .swaprow::after{display:none}
-.conv .ratio-row .swaprow span{order:-1;white-space:nowrap;text-align:center}
-.conv .swap.btn{width:auto;min-width:42px;min-height:36px}
-.conv .convert{min-height:36px;font-size:16px;padding:4px 10px}
-.conv .said{font-size:15px;min-height:18px}
+/* mini converters: have ⇄ get on one row, ratio + convert on the next */
+.win .conv{padding:10px 12px 10px;gap:8px 8px;grid-template-columns:calc((100% - 52px) / 2) 36px calc((100% - 52px) / 2);
+  grid-template-areas:"top swap out" "ratio go go" "said said said";align-items:end}
+.conv .ratio-row{display:contents}
+.conv > .field:first-child{grid-area:top}
+.conv .field.ratio{grid-area:ratio}
+.conv .swaprow{grid-area:swap}
+.conv > .field.out{grid-area:out}
+.conv .convert{grid-area:go}
+.conv .said{grid-area:said}
+.conv .field label{font-size:12px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv .field input{font-size:18px;padding:4px 7px}
+.conv .field .unit{font-size:13px;padding:0 7px}
+.conv .swaprow{display:block}
+.conv .swaprow::before,.conv .swaprow::after,.conv .swaprow span{display:none}
+.conv .swap.btn{width:36px;min-height:33px}
+.conv .convert{min-height:33px;font-size:15px;padding:3px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv .said{font-size:14px;min-height:0;line-height:1.2}
+.conv .said:empty{display:none}
 .drag .plank h2 small{font-size:12px}
+@container (max-width: 330px){
+  .win .conv{grid-template-areas:"top top swap" "out out out" "ratio go go" "said said said"}
+  .conv .field .unit{display:none}
+}
 
 /* ---------- stand counter ---------- */
 .counter{display:grid;gap:26px;grid-template-columns:minmax(0,1fr);min-width:0}
