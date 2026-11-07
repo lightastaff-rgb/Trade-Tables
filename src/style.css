@@ -437,3 +437,15 @@ footer a{color:var(--ink)}
 .receipt-col.collapsed .tape,.receipt-col.collapsed .tape-foot,.receipt-col.collapsed .receipt-note{display:none}
 .receipt-col.collapsed .tape-head{border-bottom:0;padding-bottom:14px}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- cozy pixel cursors: cream arrow, gloved pointing hand, grab hand ---------- */
+html{cursor:url("../assets/ui/cz_arrow.png") 1 1, auto}
+a,button,.btn,summary,label[for],.shot-zone,.screen button,.tape .cp,.tips button,.chat-pics button,.abacus summary{cursor:url("../assets/ui/cz_point.png") 10 1, pointer}
+.btn[disabled]{cursor:url("../assets/ui/cz_arrow.png") 1 1, default}
+.shot-zone.busy{cursor:progress}
+input,textarea{cursor:text}
+@media (min-width:761px){
+  .drag-handle,.drag-handle :not(button):not(.btn){cursor:url("../assets/ui/cz_grab.png") 16 12, grab}
+  .drag.dragging .drag-handle,.drag.dragging .drag-handle *{cursor:url("../assets/ui/cz_grab.png") 16 12, grabbing}
+}
+.stand.free .grip{cursor:ew-resize}
