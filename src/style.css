@@ -437,3 +437,157 @@ footer a{color:var(--ink)}
 .receipt-col.collapsed .tape,.receipt-col.collapsed .tape-foot,.receipt-col.collapsed .receipt-note{display:none}
 .receipt-col.collapsed .tape-head{border-bottom:0;padding-bottom:14px}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ================= HACKED skin: neon vaporwave retro-OS (an original take, toggle with the Skin button) ================= */
+html.hacked{
+  --bg:#160A33; --bg-dot:#2A1460; --parch:#221047; --parch-2:#170A35; --ink:#F7EBFF; --muted:#B79BE0;
+  --has:#43185F; --gold:#FF5FC8; --mint:#4DF2D2; --rose:#FF4F7B; --lav:#9B6BFF; --ribbon:#4DF2D2; --ribbon-ink:#12062B; --focus:#4DF2D2;
+  --hk-line:#0B0420; --hk-pink:#FF4FB3; --hk-pink-2:#FF8AD8; --hk-cyan:#4DF2D2; --hk-blue:#5B6BFF; --hk-violet:#8B3DFF;
+  color-scheme:dark;
+  cursor:url("../assets/ui/cur_arrow.png") 1 1, auto;
+}
+html.hacked *{cursor:inherit}
+html.hacked a,html.hacked button,html.hacked .btn,html.hacked summary,html.hacked label[for],html.hacked .shot-zone,html.hacked .drag-handle,html.hacked .tips button,html.hacked .tape .cp{cursor:url("../assets/ui/cur_hand.png") 9 1, pointer}
+html.hacked input,html.hacked textarea{cursor:text}
+html.hacked .grip{cursor:ew-resize}
+html.hacked body{
+  background:
+    linear-gradient(rgba(77,242,210,.05) 1px, transparent 1px) 0 0/24px 24px,
+    linear-gradient(90deg, rgba(77,242,210,.05) 1px, transparent 1px) 0 0/24px 24px,
+    radial-gradient(1200px 600px at 80% -10%, #4A137A 0%, transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, #3A0E66 0%, transparent 60%),
+    #160A33;
+  background-attachment:fixed;-webkit-font-smoothing:none}
+html.hacked body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;
+  background:repeating-linear-gradient(transparent 0 2px, rgba(10,0,30,.18) 2px 3px);mix-blend-mode:multiply}
+html.hacked ::selection{background:var(--hk-pink);color:#fff}
+
+/* windows: old-OS frames with a hard neon shadow */
+html.hacked .win,html.hacked .chat{border:3px solid var(--hk-line);border-image:none;background:var(--parch);background-clip:border-box;filter:none;
+  box-shadow:inset 2px 2px 0 #5C35B5, inset -2px -2px 0 #0E0526, 6px 6px 0 var(--hk-pink)}
+html.hacked .drag:nth-child(even) .win,html.hacked .drag.win:nth-of-type(even){box-shadow:inset 2px 2px 0 #5C35B5, inset -2px -2px 0 #0E0526, 6px 6px 0 var(--hk-cyan)}
+html.hacked .plank{background:linear-gradient(90deg,var(--hk-pink) 0%,var(--hk-violet) 55%,var(--hk-blue) 100%);border-bottom:3px solid var(--hk-line);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.2);padding:7px 12px 8px}
+html.hacked .plank::before,html.hacked .plank::after,html.hacked .board::before,html.hacked .board::after{display:none}
+html.hacked .plank h2{font:700 18px/1 var(--font);color:#fff;text-shadow:2px 2px 0 #3A0A4F;letter-spacing:.5px}
+html.hacked .plank h2::before{content:"▣ ";color:var(--hk-cyan);text-shadow:none}
+html.hacked .plank small{color:#FFE3F6;text-shadow:1px 1px 0 #3A0A4F;font-size:13px}
+html.hacked .btn.colbtn{border:2px solid var(--hk-line);border-image:none;background:#E9D9FF;color:var(--hk-line);width:30px;min-height:26px;padding:0;
+  box-shadow:inset -2px -2px 0 #9C86C9, inset 2px 2px 0 #fff;text-shadow:none}
+html.hacked .btn.colbtn:hover{background:#fff}
+html.hacked .btn.colbtn:active{box-shadow:inset 2px 2px 0 #9C86C9}
+html.hacked .swap.btn,html.hacked .chat-x.btn,html.hacked .chat-attach.btn,html.hacked .qty .btn,html.hacked .keys .btn{padding:0}
+html.hacked .swap.btn svg{width:16px;height:16px}
+html.hacked .colbtn svg{filter:none;color:var(--hk-line)}
+
+/* inputs and buttons */
+html.hacked .well{border:2px solid var(--hk-line);border-image:none;background:#12062B;box-shadow:inset 2px 2px 0 #07021A, inset -2px -2px 0 #3D2275}
+html.hacked .field.out .well{background:#2A0E45;box-shadow:inset 2px 2px 0 #07021A, inset -2px -2px 0 #6B2A8F}
+html.hacked .field input,html.hacked .qty input{color:#fff;text-shadow:0 0 6px rgba(255,95,200,.55)}
+html.hacked .field .unit{color:var(--hk-cyan)}
+html.hacked .btn{border:3px solid var(--hk-line);border-image:none;padding:4px 12px;color:#fff;text-shadow:1px 1px 0 #7A0F4B;
+  background:linear-gradient(#FF8AD8,#FF3FA4);box-shadow:inset -3px -3px 0 #C21D7A, inset 3px 3px 0 #FFC8EC, 3px 3px 0 var(--hk-line)}
+html.hacked .btn:hover{filter:brightness(1.1) saturate(1.1)}
+html.hacked .btn:active{transform:translate(2px,2px);box-shadow:inset 3px 3px 0 #C21D7A, 1px 1px 0 var(--hk-line)}
+html.hacked .btn.go{background:linear-gradient(#8BFBEA,#22C9B4);color:var(--hk-line);text-shadow:1px 1px 0 rgba(255,255,255,.6);
+  box-shadow:inset -3px -3px 0 #109985, inset 3px 3px 0 #D3FFF7, 3px 3px 0 var(--hk-line)}
+html.hacked .btn.go:active{box-shadow:inset 3px 3px 0 #109985, 1px 1px 0 var(--hk-line)}
+html.hacked .qty .btn{padding:0;background:linear-gradient(#B98CFF,#7A3DF0);box-shadow:inset -3px -3px 0 #4E1FB0, inset 3px 3px 0 #E3D1FF, 2px 2px 0 var(--hk-line)}
+
+/* header: a vaporwave desktop with a sunset grid */
+html.hacked .town{position:relative;overflow:hidden;border-bottom:3px solid var(--hk-line);min-height:260px;
+  background:
+    radial-gradient(circle at 84% 78%, #FFE08A 0 46px, #FF9A6B 47px 52px, transparent 53px),
+    repeating-linear-gradient(transparent 0 8px, transparent 8px 8px),
+    linear-gradient(#170733 0%, #3A0E66 45%, #8B2C8F 72%, #FF4FB3 100%)}
+html.hacked .town::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(#fff 1px, transparent 1.5px) 0 0/90px 70px, radial-gradient(#4DF2D2 1px, transparent 1.5px) 40px 30px/130px 90px;opacity:.55;
+  -webkit-mask:linear-gradient(#000 0 55%, transparent 75%);mask:linear-gradient(#000 0 55%, transparent 75%)}
+html.hacked .town::after{content:"";position:absolute;left:-50%;right:-50%;bottom:-2px;height:120px;pointer-events:none;
+  background:linear-gradient(transparent 0 0),repeating-linear-gradient(90deg, rgba(77,242,210,.85) 0 2px, transparent 2px 60px),
+    repeating-linear-gradient(rgba(77,242,210,.85) 0 2px, transparent 2px 22px), linear-gradient(#2A0A4E,#120428);
+  transform:perspective(160px) rotateX(58deg);transform-origin:50% 100%}
+html.hacked .town .wrap{position:relative;z-index:1}
+html.hacked .stall{display:none}
+html.hacked .hk-logo{display:flex}
+html.hacked .hk-desk{display:flex}
+.hk-logo,.hk-desk{display:none}
+.hk-logo{flex-direction:column;gap:6px;background:#12062B;border:3px solid var(--hk-line);box-shadow:inset 2px 2px 0 #5C35B5, 6px 6px 0 var(--hk-pink);padding:0 18px 14px;min-width:0}
+.hk-path{margin:0 -18px 6px;padding:5px 10px;font:400 16px/1 var(--tape);color:#fff;background:linear-gradient(90deg,#FF4FB3,#8B3DFF 60%,#5B6BFF);border-bottom:3px solid #0B0420;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hk-title{display:flex;flex-direction:column;line-height:.95}
+.hk-my{font:700 15px/1 var(--font);color:#4DF2D2;letter-spacing:3px;text-shadow:2px 2px 0 #0B0420}
+.hk-big{font:700 clamp(30px,5vw,54px)/1 var(--font);color:#FF5FC8;letter-spacing:1px;transform:rotate(-2deg);transform-origin:left;margin:2px 0 4px;
+  text-shadow:-3px 0 0 #fff,3px 0 0 #fff,0 -3px 0 #fff,0 3px 0 #fff,-3px -3px 0 #fff,3px 3px 0 #fff,-3px 3px 0 #fff,3px -3px 0 #fff,6px 6px 0 #0B0420,0 0 18px rgba(255,79,179,.8)}
+.hk-tag{font:400 22px/1 var(--tape);color:#FFE3F6;background:#0B0420;align-self:flex-start;padding:3px 8px;margin-top:6px}
+.hk-desk{gap:18px;align-self:center;margin-left:auto;margin-right:12px}
+.hk-ico{display:flex;flex-direction:column;align-items:center;gap:4px;width:74px;animation:float 3s ease-in-out infinite}
+.hk-ico:nth-child(2){animation-delay:-1s}.hk-ico:nth-child(3){animation-delay:-2s}
+.hk-ico img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 #0B0420)}
+.hk-ico i{font:400 17px/1 var(--tape);font-style:normal;color:#fff;background:#0B0420;padding:2px 5px;white-space:nowrap}
+@keyframes float{50%{transform:translateY(-6px)}}
+@media (max-width:900px){.hk-desk{display:none!important}}
+@media (max-width:560px){.hk-path{font-size:13px}.hk-tag{font-size:18px}}
+
+/* bag, items, ribbons */
+html.hacked .ribbon{background:var(--hk-cyan);color:var(--hk-line);clip-path:none;border:2px solid var(--hk-line);box-shadow:3px 3px 0 var(--hk-pink);padding:5px 12px;letter-spacing:2px}
+html.hacked .slot{border:3px solid var(--hk-line);border-image:none;background:#1C0B3E;background-clip:border-box;
+  box-shadow:inset 2px 2px 0 #3D2275, inset -2px -2px 0 #0E0526}
+html.hacked .slot:hover{background:#26104F}
+html.hacked .slot.has{background:linear-gradient(135deg,#4A1666,#2A0E52);box-shadow:inset 2px 2px 0 #FF8AD8, inset -2px -2px 0 #7A1A6A, 0 0 0 2px var(--hk-pink), 0 0 16px rgba(255,79,179,.45)}
+html.hacked .shelf.compact .slot:nth-child(odd){background:#1F0D44}
+html.hacked .shelf.compact .slot.has{background:linear-gradient(90deg,#4A1666,#2A0E52)}
+html.hacked .slot .pic img{filter:drop-shadow(2px 2px 0 #0B0420)}
+html.hacked .badge{background:var(--hk-pink);border:2px solid var(--hk-line);color:#fff}
+html.hacked .meta .px b{color:var(--hk-cyan)}
+html.hacked .purse .big{color:#fff;text-shadow:0 0 10px rgba(255,79,179,.7), 3px 3px 0 #7A0F4B}
+html.hacked .shot-zone{background:#12062B;border:2px dashed var(--hk-cyan)}
+html.hacked .shot-zone::after{border-color:var(--hk-pink)}
+
+/* calculator + receipt as terminal */
+html.hacked .screen{background:#05120F;color:var(--hk-cyan);text-shadow:0 0 8px rgba(77,242,210,.6)}
+html.hacked .keys .btn{background:linear-gradient(#3B2475,#2A1660);box-shadow:inset -3px -3px 0 #160A3A, inset 3px 3px 0 #6B4FBF, 2px 2px 0 var(--hk-line)}
+html.hacked .keys .eq{background:linear-gradient(#FF8AD8,#FF3FA4);box-shadow:inset -3px -3px 0 #C21D7A, inset 3px 3px 0 #FFC8EC, 2px 2px 0 var(--hk-line)}
+html.hacked .receipt{background:#0A0322;color:var(--hk-cyan);border:3px solid var(--hk-line);margin:0;box-shadow:inset 0 0 0 2px #2D1660, 6px 6px 0 var(--hk-cyan);filter:none}
+html.hacked .receipt::before{content:"> trade.log";position:static;display:block;height:auto;background:linear-gradient(90deg,#4DF2D2,#5B6BFF);color:#0B0420;font:400 18px/1 var(--tape);padding:5px 10px;border-bottom:3px solid #0B0420}
+html.hacked .receipt::after{display:none}
+html.hacked .tape-head{border-bottom-color:#2D1660}
+html.hacked .tape li{border-color:#2D1660}
+html.hacked .total{color:#fff}
+html.hacked .total b{color:#FF8AD8;text-shadow:0 0 10px rgba(255,79,179,.7)}
+
+/* chat in the new skin */
+html.hacked .chat-log{background:linear-gradient(rgba(77,242,210,.05) 1px, transparent 1px) 0 0/20px 20px, #160A33}
+html.hacked .msg{border:2px solid var(--hk-line);border-image:none;background:#241050;color:#fff;box-shadow:3px 3px 0 var(--hk-cyan)}
+html.hacked .row.me .msg{background:linear-gradient(#FF8AD8,#FF4FB3);color:#fff;box-shadow:3px 3px 0 var(--hk-line);text-shadow:1px 1px 0 #7A0F4B}
+html.hacked .msg::after{background:var(--hk-line)}
+html.hacked .msg .who{color:var(--hk-cyan)}
+html.hacked .slip{background:#0A0322;color:var(--hk-cyan);border-color:var(--hk-cyan)}
+html.hacked .slip-h{border-color:#2D1660}
+html.hacked .lines li{border-color:#2D1660}
+html.hacked .lines .n,html.hacked .lines .v{color:#fff}
+html.hacked .sums{background:#12062B;border-color:#2D1660}
+html.hacked .sum{color:var(--muted)}
+html.hacked .sum b{color:#fff}
+html.hacked .sum.t b{color:var(--hk-cyan)}
+html.hacked .sum.all{background:var(--hk-pink);color:#fff}
+html.hacked .sum.all b{color:#fff;text-shadow:2px 2px 0 #7A0F4B}
+html.hacked .chat-form{background:#1A0B38;border-top:3px solid var(--hk-line)}
+html.hacked .tally{background:linear-gradient(90deg,#FF4FB3,#8B3DFF);border-bottom:3px solid var(--hk-line)}
+html.hacked .tally-sums b{color:#fff;text-shadow:2px 2px 0 #3A0A4F}
+html.hacked .tally-n,html.hacked .tally-sums{color:#FFE3F6}
+html.hacked .chip{background:#241050;border-color:var(--hk-line);color:#fff}
+html.hacked .tips button{border-color:var(--hk-cyan);color:#fff}
+html.hacked .tips button:hover{background:#2A1660}
+
+/* misc */
+html.hacked .toast{background:var(--hk-pink);border:3px solid var(--hk-line);color:#fff;text-shadow:1px 1px 0 #7A0F4B;box-shadow:4px 4px 0 var(--hk-line)}
+html.hacked footer{background:#12062B;color:var(--muted)}
+html.hacked footer a{color:var(--hk-cyan)}
+html.hacked .turf{background:repeating-linear-gradient(90deg,#FF4FB3 0 24px,#8B3DFF 24px 48px,#4DF2D2 48px 72px);height:8px;border:0;border-top:3px solid var(--hk-line)}
+html.hacked .snap-guide{background:repeating-linear-gradient(var(--sg-dir,90deg),var(--hk-cyan) 0 6px,transparent 6px 10px)}
+html.hacked .drag.resizing{outline-color:var(--hk-cyan)}
+html.hacked .size-tag{background:var(--hk-line);color:var(--hk-cyan)}
+html.hacked .said{color:var(--hk-cyan)}
+html.hacked .lede,html.hacked .drag-hint{color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.hk-ico{animation:none}html.hacked body::after{display:none}}

@@ -39,7 +39,7 @@ let S = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:fal
 const isNum = v => typeof v === "number" && Number.isFinite(v);
 const clampN = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 function cleanState(raw){
-  const out = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:false}}, log:[], theme:null, layout:null, layoutV:2, collapsed:{}, compact:false};
+  const out = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:false}}, log:[], theme:null, layout:null, layoutV:2, collapsed:{}, compact:false, skin:"hacked"};
   if (!raw || typeof raw !== "object") return out;
   const ids = new Set(ITEMS.map(i => i.id));
   if (raw.qty && typeof raw.qty === "object") for (const [k, v] of Object.entries(raw.qty)) {
@@ -68,6 +68,7 @@ function cleanState(raw){
     if (ok) out.layout = L;
   }
   if (raw.compact === true) out.compact = true;
+  if (raw.skin === "graal" || raw.skin === "hacked") out.skin = raw.skin;
   if (raw.collapsed && typeof raw.collapsed === "object") for (const id of ["winBag","convG","convR","winReceipt"]) if (raw.collapsed[id] === true) out.collapsed[id] = true;
   return out;
 }
@@ -106,6 +107,16 @@ $("#themeBtn").onclick = () => {
   S.theme = dark ? "light" : "dark"; save(); applyTheme();
 };
 applyTheme();
+function applySkin(){
+  const hacked = S.skin !== "graal";
+  document.documentElement.classList.toggle("hacked", hacked);
+  $("#skinLbl").textContent = hacked ? "Hacked" : "Graal";
+  $("#skinBtn").setAttribute("aria-pressed", hacked ? "true" : "false");
+  $("#themeBtn").hidden = hacked;
+  const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = hacked ? "#1A0B38" : "#219418";
+}
+$("#skinBtn").onclick = () => { S.skin = S.skin === "graal" ? "hacked" : "graal"; save(); applySkin(); if (typeof relayout === "function") relayout(); };
+applySkin();
 
 /* ---------- bag ---------- */
 function buildShelf(){
