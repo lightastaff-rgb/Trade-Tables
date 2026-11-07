@@ -3,6 +3,8 @@
 @font-face{font-family:"Pixelify Sans";font-style:normal;font-weight:600;font-display:swap;src:url("../assets/fonts/pixelify-sans-600.woff2") format("woff2")}
 @font-face{font-family:"Pixelify Sans";font-style:normal;font-weight:700;font-display:swap;src:url("../assets/fonts/pixelify-sans-700.woff2") format("woff2")}
 @font-face{font-family:"VT323";font-style:normal;font-weight:400;font-display:swap;src:url("../assets/fonts/vt323-400.woff2") format("woff2")}
+@font-face{font-family:"Silkscreen";font-style:normal;font-weight:400;font-display:swap;src:url("../assets/fonts/silkscreen-400.woff2") format("woff2")}
+@font-face{font-family:"Silkscreen";font-style:normal;font-weight:700;font-display:swap;src:url("../assets/fonts/silkscreen-700.woff2") format("woff2")}
 /* Layout: a cozy pixel trade stand. Bevelled wood windows like a farming-sim UI: inventory bag, stand counter, paper receipt. */
 :root{
   --bg:#EEE0C1; --bg-dot:#E3D1AC;
@@ -438,156 +440,193 @@ footer a{color:var(--ink)}
 .receipt-col.collapsed .tape-head{border-bottom:0;padding-bottom:14px}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 
-/* ================= HACKED skin: neon vaporwave retro-OS (an original take, toggle with the Skin button) ================= */
+/* ================= HACKED skin: pink-and-indigo "infected desktop" (original art in the style of a cute retro-OS game) ================= */
 html.hacked{
-  --bg:#160A33; --bg-dot:#2A1460; --parch:#221047; --parch-2:#170A35; --ink:#F7EBFF; --muted:#B79BE0;
-  --has:#43185F; --gold:#FF5FC8; --mint:#4DF2D2; --rose:#FF4F7B; --lav:#9B6BFF; --ribbon:#4DF2D2; --ribbon-ink:#12062B; --focus:#4DF2D2;
-  --hk-line:#0B0420; --hk-pink:#FF4FB3; --hk-pink-2:#FF8AD8; --hk-cyan:#4DF2D2; --hk-blue:#5B6BFF; --hk-violet:#8B3DFF;
-  color-scheme:dark;
-  cursor:url("../assets/ui/cur_arrow.png") 1 1, auto;
+  --bg:#E8B9F2; --parch:#2A1B6E; --parch-2:#1D1255; --ink:#FFFFFF; --muted:#C9B8FF;
+  --has:#4A1E7A; --gold:#FFE14D; --mint:#8CFF5A; --rose:#FF5A86; --lav:#B98CFF; --ribbon:#FF4FC0; --ribbon-ink:#fff; --focus:#FFE14D;
+  --hk-pink:#FF4FC0; --hk-pink-2:#FF8FDB; --hk-deep:#16093F; --hk-ind:#2A1B6E; --hk-ind-2:#3B2A93; --hk-lilac:#C9B8FF;
+  --hk-y:#FFE14D; --hk-g:#8CFF5A; --hk-r:#FF5A86;
+  --font:"Pixelify Sans", "Trebuchet MS", system-ui, sans-serif; --caps:"Silkscreen", "Pixelify Sans", monospace;
+  color-scheme:dark; cursor:url("../assets/ui/cur_arrow.png") 1 1, auto;
 }
 html.hacked *{cursor:inherit}
 html.hacked a,html.hacked button,html.hacked .btn,html.hacked summary,html.hacked label[for],html.hacked .shot-zone,html.hacked .drag-handle,html.hacked .tips button,html.hacked .tape .cp{cursor:url("../assets/ui/cur_hand.png") 9 1, pointer}
 html.hacked input,html.hacked textarea{cursor:text}
 html.hacked .grip{cursor:ew-resize}
-html.hacked body{
-  background:
-    linear-gradient(rgba(77,242,210,.05) 1px, transparent 1px) 0 0/24px 24px,
-    linear-gradient(90deg, rgba(77,242,210,.05) 1px, transparent 1px) 0 0/24px 24px,
-    radial-gradient(1200px 600px at 80% -10%, #4A137A 0%, transparent 60%),
-    radial-gradient(900px 500px at 0% 110%, #3A0E66 0%, transparent 60%),
-    #160A33;
-  background-attachment:fixed;-webkit-font-smoothing:none}
+html.hacked body{color:#fff;padding-bottom:52px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Cpath fill='%23F2C6F7' d='M3 2h2v1h1V2h2v1h1v2H8v1H7v1H6v1H5V7H4V6H3V5H2V3h1z'/%3E%3C/svg%3E") 0 0/24px 24px,
+    repeating-linear-gradient(180deg, #E8B9F2 0 140px, #F0C9F6 140px 150px, #E8B9F2 150px 210px, #DFA9EE 210px 214px),
+    #E8B9F2;background-attachment:fixed}
 html.hacked body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:200;
-  background:repeating-linear-gradient(transparent 0 2px, rgba(10,0,30,.18) 2px 3px);mix-blend-mode:multiply}
+  background:repeating-linear-gradient(transparent 0 2px, rgba(40,0,60,.07) 2px 3px)}
 html.hacked ::selection{background:var(--hk-pink);color:#fff}
+html.hacked .lede,html.hacked .drag-hint{color:#4A2A7A}
+html.hacked .lede{font-weight:500}
 
-/* windows: old-OS frames with a hard neon shadow */
-html.hacked .win,html.hacked .chat{border:3px solid var(--hk-line);border-image:none;background:var(--parch);background-clip:border-box;filter:none;
-  box-shadow:inset 2px 2px 0 #5C35B5, inset -2px -2px 0 #0E0526, 6px 6px 0 var(--hk-pink)}
-html.hacked .drag:nth-child(even) .win,html.hacked .drag.win:nth-of-type(even){box-shadow:inset 2px 2px 0 #5C35B5, inset -2px -2px 0 #0E0526, 6px 6px 0 var(--hk-cyan)}
-html.hacked .plank{background:linear-gradient(90deg,var(--hk-pink) 0%,var(--hk-violet) 55%,var(--hk-blue) 100%);border-bottom:3px solid var(--hk-line);
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.35), inset 0 -2px 0 rgba(0,0,0,.2);padding:7px 12px 8px}
-html.hacked .plank::before,html.hacked .plank::after,html.hacked .board::before,html.hacked .board::after{display:none}
-html.hacked .plank h2{font:700 18px/1 var(--font);color:#fff;text-shadow:2px 2px 0 #3A0A4F;letter-spacing:.5px}
-html.hacked .plank h2::before{content:"▣ ";color:var(--hk-cyan);text-shadow:none}
-html.hacked .plank small{color:#FFE3F6;text-shadow:1px 1px 0 #3A0A4F;font-size:13px}
-html.hacked .btn.colbtn{border:2px solid var(--hk-line);border-image:none;background:#E9D9FF;color:var(--hk-line);width:30px;min-height:26px;padding:0;
-  box-shadow:inset -2px -2px 0 #9C86C9, inset 2px 2px 0 #fff;text-shadow:none}
-html.hacked .btn.colbtn:hover{background:#fff}
-html.hacked .btn.colbtn:active{box-shadow:inset 2px 2px 0 #9C86C9}
+/* windows: indigo body with a heart texture, thick hot-pink pixel border, pink title bar with little boxes */
+html.hacked .win,html.hacked .chat,.hk-win{border:4px solid var(--hk-pink);border-image:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Cpath fill='%232E1E78' d='M3 2h2v1h1V2h2v1h1v2H8v1H7v1H6v1H5V7H4V6H3V5H2V3h1z'/%3E%3C/svg%3E") 6px 6px/24px 24px, var(--hk-ind);background-clip:border-box;filter:none;
+  box-shadow:0 0 0 2px var(--hk-deep), inset 0 0 0 2px var(--hk-deep), 4px 4px 0 2px rgba(60,10,90,.35)}
+html.hacked .plank,.hk-bar{background:linear-gradient(var(--hk-pink-2) 0 3px, var(--hk-pink) 3px);border-bottom:3px solid var(--hk-deep);box-shadow:none;padding:6px 64px 6px 10px}
+html.hacked .plank::before{display:none}
+html.hacked .plank::after,.hk-box.x{content:"";display:block;position:absolute;top:50%;right:8px;left:auto;width:18px;height:16px;transform:translateY(-50%);
+  background:linear-gradient(45deg,transparent 42%,var(--hk-deep) 42% 58%,transparent 58%),linear-gradient(-45deg,transparent 42%,var(--hk-deep) 42% 58%,transparent 58%),#fff;
+  background-size:10px 10px,10px 10px,auto;background-position:center;background-repeat:no-repeat;border:2px solid var(--hk-deep)}
+html.hacked .plank h2,.hk-bar span{font:700 16px/1.1 var(--caps);color:var(--hk-deep);text-shadow:none;letter-spacing:.5px;text-transform:uppercase}
+html.hacked .plank h2::before{content:none}
+html.hacked .plank small{font:400 13px/1.2 var(--font);color:#5A0F4A;text-shadow:none;margin-top:2px}
+html.hacked .btn.colbtn{right:32px;width:20px;min-height:18px;height:18px;padding:0;border:2px solid var(--hk-deep);background:#fff;box-shadow:none;color:var(--hk-deep)}
+html.hacked .btn.colbtn svg{width:10px;height:10px;color:var(--hk-deep);filter:none}
+html.hacked .btn.colbtn:hover{background:var(--hk-y)}
+html.hacked .btn.colbtn:active{transform:translateY(-50%)}
+
+html.hacked .abacus .plank::after,html.hacked .chat .plank::after{display:none}
+html.hacked .chat-x.btn{width:24px;min-height:22px;height:22px;font-size:12px;background:#fff;color:var(--hk-deep);text-shadow:none;box-shadow:none;border:2px solid var(--hk-deep)}
+html.hacked .sum.all b{font-size:20px;white-space:nowrap}
+html.hacked .abacus summary .chev{color:#fff;filter:drop-shadow(1px 1px 0 var(--hk-deep))}
+html.hacked .plank h2{font-family:var(--caps), "Pixelify Sans", sans-serif}
+/* inputs */
+html.hacked .well{border:2px solid var(--hk-lilac);border-image:none;background:var(--hk-deep);box-shadow:inset 0 0 0 2px #0C0430}
+html.hacked .field.out .well{background:#3A1260;border-color:var(--hk-pink)}
+html.hacked .field label{font:400 11px/1 var(--caps);text-transform:uppercase;color:var(--hk-lilac);letter-spacing:.3px}
+html.hacked .field input,html.hacked .qty input{color:#fff;font-weight:600}
+html.hacked .field .unit{color:var(--hk-y);font-family:var(--caps);text-transform:uppercase;font-size:11px}
+
+/* buttons: pink with a thick dark edge; the main ones get yellow caps text */
+html.hacked .btn{border:3px solid var(--hk-deep);border-image:none;padding:4px 12px;color:#fff;font-family:var(--caps);font-weight:700;text-transform:uppercase;letter-spacing:.3px;
+  background:linear-gradient(var(--hk-pink-2) 0 3px, var(--hk-pink) 3px calc(100% - 4px), #C2248E calc(100% - 4px));text-shadow:2px 2px 0 var(--hk-deep);box-shadow:0 0 0 2px #fff inset}
+html.hacked .btn:hover{filter:brightness(1.08)}
+html.hacked .btn:active{transform:translateY(2px)}
+html.hacked .btn.go{color:var(--hk-y);font-size:17px}
 html.hacked .swap.btn,html.hacked .chat-x.btn,html.hacked .chat-attach.btn,html.hacked .qty .btn,html.hacked .keys .btn{padding:0}
 html.hacked .swap.btn svg{width:16px;height:16px}
-html.hacked .colbtn svg{filter:none;color:var(--hk-line)}
+html.hacked .qty .btn,html.hacked .keys .btn{background:var(--hk-ind-2);box-shadow:0 0 0 2px var(--hk-lilac) inset}
+html.hacked .keys .eq{background:linear-gradient(var(--hk-pink-2) 0 3px, var(--hk-pink) 3px);color:var(--hk-y)}
 
-/* inputs and buttons */
-html.hacked .well{border:2px solid var(--hk-line);border-image:none;background:#12062B;box-shadow:inset 2px 2px 0 #07021A, inset -2px -2px 0 #3D2275}
-html.hacked .field.out .well{background:#2A0E45;box-shadow:inset 2px 2px 0 #07021A, inset -2px -2px 0 #6B2A8F}
-html.hacked .field input,html.hacked .qty input{color:#fff;text-shadow:0 0 6px rgba(255,95,200,.55)}
-html.hacked .field .unit{color:var(--hk-cyan)}
-html.hacked .btn{border:3px solid var(--hk-line);border-image:none;padding:4px 12px;color:#fff;text-shadow:1px 1px 0 #7A0F4B;
-  background:linear-gradient(#FF8AD8,#FF3FA4);box-shadow:inset -3px -3px 0 #C21D7A, inset 3px 3px 0 #FFC8EC, 3px 3px 0 var(--hk-line)}
-html.hacked .btn:hover{filter:brightness(1.1) saturate(1.1)}
-html.hacked .btn:active{transform:translate(2px,2px);box-shadow:inset 3px 3px 0 #C21D7A, 1px 1px 0 var(--hk-line)}
-html.hacked .btn.go{background:linear-gradient(#8BFBEA,#22C9B4);color:var(--hk-line);text-shadow:1px 1px 0 rgba(255,255,255,.6);
-  box-shadow:inset -3px -3px 0 #109985, inset 3px 3px 0 #D3FFF7, 3px 3px 0 var(--hk-line)}
-html.hacked .btn.go:active{box-shadow:inset 3px 3px 0 #109985, 1px 1px 0 var(--hk-line)}
-html.hacked .qty .btn{padding:0;background:linear-gradient(#B98CFF,#7A3DF0);box-shadow:inset -3px -3px 0 #4E1FB0, inset 3px 3px 0 #E3D1FF, 2px 2px 0 var(--hk-line)}
-
-/* header: a vaporwave desktop with a sunset grid */
-html.hacked .town{position:relative;overflow:hidden;border-bottom:3px solid var(--hk-line);min-height:260px;
-  background:
-    radial-gradient(circle at 84% 78%, #FFE08A 0 46px, #FF9A6B 47px 52px, transparent 53px),
-    repeating-linear-gradient(transparent 0 8px, transparent 8px 8px),
-    linear-gradient(#170733 0%, #3A0E66 45%, #8B2C8F 72%, #FF4FB3 100%)}
-html.hacked .town::before{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(#fff 1px, transparent 1.5px) 0 0/90px 70px, radial-gradient(#4DF2D2 1px, transparent 1.5px) 40px 30px/130px 90px;opacity:.55;
-  -webkit-mask:linear-gradient(#000 0 55%, transparent 75%);mask:linear-gradient(#000 0 55%, transparent 75%)}
-html.hacked .town::after{content:"";position:absolute;left:-50%;right:-50%;bottom:-2px;height:120px;pointer-events:none;
-  background:linear-gradient(transparent 0 0),repeating-linear-gradient(90deg, rgba(77,242,210,.85) 0 2px, transparent 2px 60px),
-    repeating-linear-gradient(rgba(77,242,210,.85) 0 2px, transparent 2px 22px), linear-gradient(#2A0A4E,#120428);
-  transform:perspective(160px) rotateX(58deg);transform-origin:50% 100%}
-html.hacked .town .wrap{position:relative;z-index:1}
+/* header becomes the desktop */
+html.hacked .town{background:none;border:0;min-height:0}
+html.hacked .town .wrap{padding-block:22px 6px}
 html.hacked .stall{display:none}
-html.hacked .hk-logo{display:flex}
-html.hacked .hk-desk{display:flex}
-.hk-logo,.hk-desk{display:none}
-.hk-logo{flex-direction:column;gap:6px;background:#12062B;border:3px solid var(--hk-line);box-shadow:inset 2px 2px 0 #5C35B5, 6px 6px 0 var(--hk-pink);padding:0 18px 14px;min-width:0}
-.hk-path{margin:0 -18px 6px;padding:5px 10px;font:400 16px/1 var(--tape);color:#fff;background:linear-gradient(90deg,#FF4FB3,#8B3DFF 60%,#5B6BFF);border-bottom:3px solid #0B0420;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hk-title{display:flex;flex-direction:column;line-height:.95}
-.hk-my{font:700 15px/1 var(--font);color:#4DF2D2;letter-spacing:3px;text-shadow:2px 2px 0 #0B0420}
-.hk-big{font:700 clamp(30px,5vw,54px)/1 var(--font);color:#FF5FC8;letter-spacing:1px;transform:rotate(-2deg);transform-origin:left;margin:2px 0 4px;
-  text-shadow:-3px 0 0 #fff,3px 0 0 #fff,0 -3px 0 #fff,0 3px 0 #fff,-3px -3px 0 #fff,3px 3px 0 #fff,-3px 3px 0 #fff,3px -3px 0 #fff,6px 6px 0 #0B0420,0 0 18px rgba(255,79,179,.8)}
-.hk-tag{font:400 22px/1 var(--tape);color:#FFE3F6;background:#0B0420;align-self:flex-start;padding:3px 8px;margin-top:6px}
-.hk-desk{gap:18px;align-self:center;margin-left:auto;margin-right:12px}
-.hk-ico{display:flex;flex-direction:column;align-items:center;gap:4px;width:74px;animation:float 3s ease-in-out infinite}
-.hk-ico:nth-child(2){animation-delay:-1s}.hk-ico:nth-child(3){animation-delay:-2s}
-.hk-ico img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 #0B0420)}
-.hk-ico i{font:400 17px/1 var(--tape);font-style:normal;color:#fff;background:#0B0420;padding:2px 5px;white-space:nowrap}
-@keyframes float{50%{transform:translateY(-6px)}}
-@media (max-width:900px){.hk-desk{display:none!important}}
-@media (max-width:560px){.hk-path{font-size:13px}.hk-tag{font-size:18px}}
+html.hacked .sign{align-items:stretch;gap:18px}
+.hk-icons,.hk-win{display:none}
+html.hacked .hk-icons{display:flex;flex-direction:column;gap:14px;justify-content:center}
+html.hacked .hk-win{display:block;position:relative}
+.hk-ico{display:flex;flex-direction:column;align-items:center;gap:3px;width:88px;text-align:center}
+.hk-ico img{width:34px;height:34px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(22,9,63,.5))}
+.hk-ico i{font:700 11px/1.15 var(--caps);font-style:normal;color:var(--hk-deep);text-transform:lowercase}
+.hk-bar{position:relative}
+.hk-box{display:block;position:absolute;top:50%;transform:translateY(-50%);right:32px;width:18px;height:16px;border:2px solid var(--hk-deep);background:#fff}
+.hk-box::after{content:"";position:absolute;left:3px;right:3px;bottom:3px;height:2px;background:var(--hk-deep)}
+.hk-box.x::after{content:none}
+.hk-main{flex:1;min-width:0;max-width:640px}
+.hk-body{padding:16px 18px 18px}
+.hk-title{display:inline-block;font:700 clamp(26px,4.2vw,44px)/1 var(--caps);color:#fff;padding:10px 18px 12px;border:3px solid #fff;outline:3px solid var(--hk-deep);outline-offset:-9px;
+  background:var(--hk-deep);text-shadow:3px 3px 0 #6A1F8F;letter-spacing:1px}
+.hk-title span{color:var(--hk-pink);text-shadow:2px 2px 0 var(--hk-deep)}
+.hk-sub{margin:12px 0 0;font:600 17px/1.35 var(--font);color:#fff}
+.hk-sub em{font-style:normal}.hk-sub .y{color:var(--hk-y)}.hk-sub .p{color:var(--hk-pink-2)}.hk-sub .g{color:var(--hk-g)}
+.hk-wallet{width:200px;flex:none}
+.hk-wallet .hk-body{padding:10px 12px 12px;text-align:center}
+.hk-tag{display:inline-block;font:700 14px/1 var(--caps);color:var(--hk-deep);background:var(--hk-g);padding:4px 10px 3px;border:2px solid var(--hk-deep)}
+.hk-num{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
+.hk-num img{width:24px;height:auto;image-rendering:pixelated}
+.hk-num b{font:700 26px/1 var(--caps);color:#fff;text-shadow:2px 2px 0 var(--hk-deep)}
+.hk-line{height:3px;background:#fff;margin:9px 4px}
+.hk-small{font:700 14px/1 var(--caps);color:var(--hk-y)}
+html.hacked .header-right{align-self:flex-start;flex-direction:column;align-items:stretch}
+@media (max-width:980px){html.hacked .hk-icons{display:none}}
+@media (max-width:720px){html.hacked .hk-wallet{display:none}html.hacked .header-right{flex-direction:row;align-self:auto}}
 
-/* bag, items, ribbons */
-html.hacked .ribbon{background:var(--hk-cyan);color:var(--hk-line);clip-path:none;border:2px solid var(--hk-line);box-shadow:3px 3px 0 var(--hk-pink);padding:5px 12px;letter-spacing:2px}
-html.hacked .slot{border:3px solid var(--hk-line);border-image:none;background:#1C0B3E;background-clip:border-box;
-  box-shadow:inset 2px 2px 0 #3D2275, inset -2px -2px 0 #0E0526}
-html.hacked .slot:hover{background:#26104F}
-html.hacked .slot.has{background:linear-gradient(135deg,#4A1666,#2A0E52);box-shadow:inset 2px 2px 0 #FF8AD8, inset -2px -2px 0 #7A1A6A, 0 0 0 2px var(--hk-pink), 0 0 16px rgba(255,79,179,.45)}
-html.hacked .shelf.compact .slot:nth-child(odd){background:#1F0D44}
-html.hacked .shelf.compact .slot.has{background:linear-gradient(90deg,#4A1666,#2A0E52)}
-html.hacked .slot .pic img{filter:drop-shadow(2px 2px 0 #0B0420)}
-html.hacked .badge{background:var(--hk-pink);border:2px solid var(--hk-line);color:#fff}
-html.hacked .meta .px b{color:var(--hk-cyan)}
-html.hacked .purse .big{color:#fff;text-shadow:0 0 10px rgba(255,79,179,.7), 3px 3px 0 #7A0F4B}
-html.hacked .shot-zone{background:#12062B;border:2px dashed var(--hk-cyan)}
-html.hacked .shot-zone::after{border-color:var(--hk-pink)}
+/* bag + item tiles */
+html.hacked .ribbon{background:var(--hk-deep);color:#fff;clip-path:none;border:2px solid #fff;outline:2px solid var(--hk-deep);font:700 13px/1 var(--caps);letter-spacing:1px;padding:6px 12px;box-shadow:none}
+html.hacked .shelf h3{margin:18px 2px 10px}
+html.hacked .slot{border:3px solid var(--hk-lilac);border-image:none;background:var(--hk-deep);background-clip:border-box;box-shadow:inset 0 0 0 2px #0C0430}
+html.hacked .slot:hover{border-color:#fff}
+html.hacked .slot.has{border-color:var(--hk-pink);background:linear-gradient(var(--hk-pink) 0 0) 0 0/100% 4px no-repeat, #3A1260;box-shadow:inset 0 0 0 2px #0C0430, 0 0 0 2px var(--hk-deep)}
+html.hacked .shelf.compact .slot:nth-child(odd){background:#211565}
+html.hacked .shelf.compact .slot.has{background:#3A1260}
+html.hacked .meta .nm{font:700 14px/1.1 var(--caps);text-transform:uppercase;color:#fff}
+html.hacked .meta .px{color:var(--hk-lilac)}
+html.hacked .meta .px b{color:var(--hk-y)}
+html.hacked .val{color:var(--hk-lilac)}
+html.hacked .slot.has .val{color:var(--hk-g)}
+html.hacked .badge{background:var(--hk-y);color:var(--hk-deep);border:2px solid var(--hk-deep);text-shadow:none;font-family:var(--caps)}
+html.hacked .purse{background:var(--hk-deep);border:2px solid var(--hk-lilac)}
+html.hacked .purse .big{font-family:var(--caps);color:#fff;text-shadow:2px 2px 0 #6A1F8F}
+html.hacked .purse .lbl,html.hacked .purse .side{color:var(--hk-lilac)}
+html.hacked .shot-zone{background:var(--hk-deep);border:2px dashed var(--hk-pink)}
+html.hacked .shot-title{font-family:var(--caps);text-transform:uppercase;color:var(--hk-y)}
+html.hacked .shot-hint{color:var(--hk-lilac)}
+html.hacked .shot-hint kbd{background:var(--hk-ind-2);border-color:#fff;color:#fff}
 
-/* calculator + receipt as terminal */
-html.hacked .screen{background:#05120F;color:var(--hk-cyan);text-shadow:0 0 8px rgba(77,242,210,.6)}
-html.hacked .keys .btn{background:linear-gradient(#3B2475,#2A1660);box-shadow:inset -3px -3px 0 #160A3A, inset 3px 3px 0 #6B4FBF, 2px 2px 0 var(--hk-line)}
-html.hacked .keys .eq{background:linear-gradient(#FF8AD8,#FF3FA4);box-shadow:inset -3px -3px 0 #C21D7A, inset 3px 3px 0 #FFC8EC, 2px 2px 0 var(--hk-line)}
-html.hacked .receipt{background:#0A0322;color:var(--hk-cyan);border:3px solid var(--hk-line);margin:0;box-shadow:inset 0 0 0 2px #2D1660, 6px 6px 0 var(--hk-cyan);filter:none}
-html.hacked .receipt::before{content:"> trade.log";position:static;display:block;height:auto;background:linear-gradient(90deg,#4DF2D2,#5B6BFF);color:#0B0420;font:400 18px/1 var(--tape);padding:5px 10px;border-bottom:3px solid #0B0420}
+/* converters, calculator, receipt (score-window look) */
+html.hacked .said{color:var(--hk-g);font-family:var(--caps);font-size:12px;text-transform:uppercase}
+html.hacked .screen{background:var(--hk-deep);border:2px solid #fff;color:#fff}
+html.hacked .receipt{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Cpath fill='%232E1E78' d='M3 2h2v1h1V2h2v1h1v2H8v1H7v1H6v1H5V7H4V6H3V5H2V3h1z'/%3E%3C/svg%3E") 6px 6px/24px 24px, var(--hk-ind);color:#fff;border:4px solid var(--hk-pink);margin:0;filter:none;box-shadow:0 0 0 2px var(--hk-deep), inset 0 0 0 2px var(--hk-deep)}
+html.hacked .receipt::before{content:"receipt.log";position:relative;display:block;inset:auto;height:auto;font:700 16px/1 var(--caps);color:var(--hk-deep);
+  background:linear-gradient(var(--hk-pink-2) 0 3px, var(--hk-pink) 3px);padding:7px 10px;border-bottom:3px solid var(--hk-deep)}
 html.hacked .receipt::after{display:none}
-html.hacked .tape-head{border-bottom-color:#2D1660}
-html.hacked .tape li{border-color:#2D1660}
-html.hacked .total{color:#fff}
-html.hacked .total b{color:#FF8AD8;text-shadow:0 0 10px rgba(255,79,179,.7)}
+html.hacked .tape-head{border-bottom:3px solid #fff;margin:0 12px}
+html.hacked .tape-head .t{font-family:var(--caps);color:var(--hk-y)}
+html.hacked .tape li{border-color:rgba(201,184,255,.3);color:#fff}
+html.hacked .total{color:#fff;font-family:var(--caps);font-size:18px;text-transform:uppercase}
+html.hacked .total b{color:var(--hk-y);font-size:26px;text-shadow:2px 2px 0 var(--hk-deep)}
+html.hacked .empty{color:var(--hk-lilac)}
 
-/* chat in the new skin */
-html.hacked .chat-log{background:linear-gradient(rgba(77,242,210,.05) 1px, transparent 1px) 0 0/20px 20px, #160A33}
-html.hacked .msg{border:2px solid var(--hk-line);border-image:none;background:#241050;color:#fff;box-shadow:3px 3px 0 var(--hk-cyan)}
-html.hacked .row.me .msg{background:linear-gradient(#FF8AD8,#FF4FB3);color:#fff;box-shadow:3px 3px 0 var(--hk-line);text-shadow:1px 1px 0 #7A0F4B}
-html.hacked .msg::after{background:var(--hk-line)}
-html.hacked .msg .who{color:var(--hk-cyan)}
-html.hacked .slip{background:#0A0322;color:var(--hk-cyan);border-color:var(--hk-cyan)}
-html.hacked .slip-h{border-color:#2D1660}
-html.hacked .lines li{border-color:#2D1660}
+/* taskbar */
+.hk-taskbar{display:none}
+html.hacked .hk-taskbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:58;height:44px;align-items:center;justify-content:space-between;gap:10px;
+  padding:0 max(10px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(10px, env(safe-area-inset-left, 0px));
+  background:var(--hk-deep);border-top:3px solid var(--hk-pink);box-shadow:0 -2px 0 var(--hk-deep)}
+.hk-apps{display:flex;gap:6px;min-width:0;overflow-x:auto;scrollbar-width:none}
+.hk-apps button{display:flex;align-items:center;gap:6px;height:32px;padding:0 9px;background:var(--hk-ind-2);color:#fff;border:2px solid var(--hk-lilac);font:700 12px/1 var(--caps);white-space:nowrap}
+.hk-apps button:hover{background:var(--hk-pink);border-color:#fff}
+.hk-apps img{width:18px;height:18px;object-fit:contain;image-rendering:pixelated}
+.hk-glyph{font:700 16px/1 var(--caps);color:var(--hk-y)}
+.hk-tray{display:flex;align-items:center;gap:12px;color:#fff;flex:none}
+.hk-batt{display:flex;gap:2px;padding:2px;border:2px solid #fff;position:relative}
+.hk-batt::after{content:"";position:absolute;right:-5px;top:4px;width:3px;height:6px;background:#fff}
+.hk-batt i{width:6px;height:10px;background:var(--hk-g)}
+.hk-wifi{width:22px;height:16px}
+.hk-clock{font:700 15px/1 var(--caps);padding:6px 9px;border:2px solid var(--hk-lilac);background:var(--hk-ind)}
+@media (max-width:560px){.hk-apps span:not(.hk-glyph){display:none}.hk-wifi,.hk-batt{display:none}}
+html.hacked .chat-fab{display:none!important}
+html.hacked .chat{bottom:calc(56px + env(safe-area-inset-bottom, 0px))}
+html.hacked .toast{bottom:calc(60px + env(safe-area-inset-bottom, 0px))}
+
+/* chat */
+html.hacked .chat-log{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' shape-rendering='crispEdges'%3E%3Cpath fill='%232E1E78' d='M3 2h2v1h1V2h2v1h1v2H8v1H7v1H6v1H5V7H4V6H3V5H2V3h1z'/%3E%3C/svg%3E") 6px 6px/24px 24px, var(--hk-ind)}
+html.hacked .msg{border:3px solid var(--hk-lilac);border-image:none;background:var(--hk-deep);color:#fff}
+html.hacked .row.me .msg{border-color:var(--hk-pink);background:#3A1260}
+html.hacked .msg::after{background:var(--hk-lilac)}
+html.hacked .row.me .msg::after{background:var(--hk-pink)}
+html.hacked .msg .who{color:var(--hk-y);font-family:var(--caps)}
+html.hacked .slip{background:var(--hk-deep);color:#fff;border-color:#fff}
+html.hacked .slip-h{border-color:#fff;color:var(--hk-y);font-family:var(--caps)}
+html.hacked .lines li{border-color:rgba(201,184,255,.3)}
 html.hacked .lines .n,html.hacked .lines .v{color:#fff}
-html.hacked .sums{background:#12062B;border-color:#2D1660}
-html.hacked .sum{color:var(--muted)}
-html.hacked .sum b{color:#fff}
-html.hacked .sum.t b{color:var(--hk-cyan)}
-html.hacked .sum.all{background:var(--hk-pink);color:#fff}
-html.hacked .sum.all b{color:#fff;text-shadow:2px 2px 0 #7A0F4B}
-html.hacked .chat-form{background:#1A0B38;border-top:3px solid var(--hk-line)}
-html.hacked .tally{background:linear-gradient(90deg,#FF4FB3,#8B3DFF);border-bottom:3px solid var(--hk-line)}
-html.hacked .tally-sums b{color:#fff;text-shadow:2px 2px 0 #3A0A4F}
-html.hacked .tally-n,html.hacked .tally-sums{color:#FFE3F6}
-html.hacked .chip{background:#241050;border-color:var(--hk-line);color:#fff}
-html.hacked .tips button{border-color:var(--hk-cyan);color:#fff}
-html.hacked .tips button:hover{background:#2A1660}
+html.hacked .lines .n small,html.hacked .slip-h span{color:var(--hk-lilac)}
+html.hacked .sums{background:#211565;border-color:#fff}
+html.hacked .sum{color:var(--hk-lilac)}
+html.hacked .sum b{color:#fff;font-family:var(--caps)}
+html.hacked .sum.t b{color:var(--hk-g)}
+html.hacked .sum.all{background:var(--hk-pink);color:var(--hk-deep);font-family:var(--caps)}
+html.hacked .sum.all b{color:var(--hk-y);text-shadow:2px 2px 0 var(--hk-deep)}
+html.hacked .chat-form{background:var(--hk-deep);border-top:3px solid var(--hk-pink)}
+html.hacked .tally{background:var(--hk-deep);border-bottom:3px solid var(--hk-pink)}
+html.hacked .tally-top{color:var(--hk-g);font-family:var(--caps)}
+html.hacked .tally-sums b{color:var(--hk-y);font-family:var(--caps)}
+html.hacked .chip{background:var(--hk-deep);border-color:var(--hk-lilac);color:#fff}
+html.hacked .tips button{border-color:var(--hk-lilac);color:#fff}
+html.hacked .tips button:hover{background:var(--hk-ind-2)}
 
 /* misc */
-html.hacked .toast{background:var(--hk-pink);border:3px solid var(--hk-line);color:#fff;text-shadow:1px 1px 0 #7A0F4B;box-shadow:4px 4px 0 var(--hk-line)}
-html.hacked footer{background:#12062B;color:var(--muted)}
-html.hacked footer a{color:var(--hk-cyan)}
-html.hacked .turf{background:repeating-linear-gradient(90deg,#FF4FB3 0 24px,#8B3DFF 24px 48px,#4DF2D2 48px 72px);height:8px;border:0;border-top:3px solid var(--hk-line)}
-html.hacked .snap-guide{background:repeating-linear-gradient(var(--sg-dir,90deg),var(--hk-cyan) 0 6px,transparent 6px 10px)}
-html.hacked .drag.resizing{outline-color:var(--hk-cyan)}
-html.hacked .size-tag{background:var(--hk-line);color:var(--hk-cyan)}
-html.hacked .said{color:var(--hk-cyan)}
-html.hacked .lede,html.hacked .drag-hint{color:var(--muted)}
-@media (prefers-reduced-motion:reduce){.hk-ico{animation:none}html.hacked body::after{display:none}}
+html.hacked .toast{background:var(--hk-deep);border:3px solid var(--hk-pink);color:var(--hk-y);font-family:var(--caps);text-shadow:none}
+html.hacked footer{background:var(--hk-deep);color:var(--hk-lilac)}
+html.hacked footer a{color:var(--hk-y)}
+html.hacked .turf{display:none}
+html.hacked .snap-guide{background:repeating-linear-gradient(var(--sg-dir,90deg),var(--hk-pink) 0 6px,transparent 6px 10px)}
+html.hacked .drag.resizing{outline-color:var(--hk-pink)}
+html.hacked .size-tag{background:var(--hk-deep);color:var(--hk-y);font-family:var(--caps)}
+html.hacked .layout-bar .btn,html.hacked .bag-actions .btn{font-size:13px}
+@media (prefers-reduced-motion:reduce){html.hacked body::after{display:none}}

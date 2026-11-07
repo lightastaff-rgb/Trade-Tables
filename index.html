@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-title" content="Trade Stand">
 <link rel="preload" href="assets/fonts/pixelify-sans-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/pixelify-sans-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=f6a5717562">
+<link rel="stylesheet" href="css/style.css?v=72c4459acf">
 </head>
 <body>
 <header class="town">
@@ -32,14 +32,20 @@
           </div>
         </div>
       </div>
-      <div class="hk-logo" aria-hidden="true">
-        <span class="hk-path">C:\GRAAL_ERA\TRADE_STAND.EXE</span>
-        <span class="hk-title"><span class="hk-my">GRAAL ERA</span><span class="hk-big">TRADE STAND</span><span class="hk-tag">your loot can't be this cheap?!</span></span>
+      <div class="hk-icons" aria-hidden="true">
+        <span class="hk-ico"><img src="assets/ui/gralat.png" alt=""><i>my_gralat_<br>wallet</i></span>
+        <span class="hk-ico"><img src="assets/ui/tro.png" alt=""><i>tro_stash.zip</i></span>
       </div>
-      <div class="hk-desk" aria-hidden="true">
-        <span class="hk-ico"><img src="assets/ui/cur_hand.png" alt=""><i>loot.zip</i></span>
-        <span class="hk-ico"><img src="assets/ui/gralat.png" alt=""><i>gralats.exe</i></span>
-        <span class="hk-ico"><img src="assets/ui/tro.png" alt=""><i>tro.dll</i></span>
+      <div class="hk-win hk-main">
+        <div class="hk-bar"><span>trade_stand.exe</span><b class="hk-box"></b><b class="hk-box x"></b></div>
+        <div class="hk-body">
+          <div class="hk-title">TRADE STAND <span>♥</span></div>
+          <p class="hk-sub">Count your <em class="y">loot</em>, price it in <em class="p">gralats</em>, trade it for <em class="g">Tro</em>.</p>
+        </div>
+      </div>
+      <div class="hk-win hk-wallet" aria-live="off">
+        <div class="hk-bar"><span>wallet</span><b class="hk-box"></b><b class="hk-box x"></b></div>
+        <div class="hk-body"><div class="hk-tag">BAG</div><div class="hk-num"><img src="assets/ui/gralat.png" alt=""><b id="hkWallet">0</b></div><div class="hk-line"></div><div class="hk-small" id="hkWalletTro">= 0 Tro</div></div>
       </div>
       <div class="header-right">
         <button class="btn" id="skinBtn" type="button" aria-pressed="true">Skin: <span id="skinLbl">Hacked</span></button>
@@ -132,6 +138,20 @@
   </div>
 </main>
 
+<nav class="hk-taskbar" aria-label="Taskbar">
+  <div class="hk-apps">
+    <button type="button" data-go="winBag" title="Inventory bag"><img src="assets/ui/gralat.png" alt=""><span>BAG</span></button>
+    <button type="button" data-go="convG" title="Gralats to Tro"><img src="assets/ui/tro.png" alt=""><span>GRALATS</span></button>
+    <button type="button" data-go="convR" title="Rocks to Tro"><img src="assets/ui/tro.png" alt=""><span>ROCKS</span></button>
+    <button type="button" data-go="winReceipt" title="Trade receipt"><span class="hk-glyph">≡</span><span>RECEIPT</span></button>
+    <button type="button" data-go="chat" title="Trade Chat"><img src="assets/ui/cur_hand.png" alt=""><span>CHAT</span></button>
+  </div>
+  <div class="hk-tray" aria-hidden="true">
+    <span class="hk-batt"><i></i><i></i><i></i></span>
+    <svg class="hk-wifi" viewBox="0 0 11 8" shape-rendering="crispEdges"><path fill="currentColor" d="M2 0h7v1h2v1h-2v-1H2v1H0V1h2zM3 3h5v1h1v1H8V4H3v1H2V4h1zM5 6h1v2H5z"/></svg>
+    <span class="hk-clock" id="hkClock">00:00</span>
+  </div>
+</nav>
 <button class="btn chat-fab" id="chatFab" type="button" aria-controls="chat" aria-expanded="false" hidden>
   <img class="face" src="assets/ui/keeper.png" alt="" width="28" height="42"><span>Trade Chat</span>
 </button>
@@ -164,6 +184,6 @@
   </div>
 </footer>
 <div class="toast" id="toast" role="status"></div>
-<script src="app.js?v=50a479e2c6" defer></script>
+<script src="app.js?v=155228b432" defer></script>
 </body>
 </html>

@@ -115,6 +115,23 @@ function applySkin(){
   $("#themeBtn").hidden = hacked;
   const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = hacked ? "#1A0B38" : "#219418";
 }
+/* hacked skin desktop bits: live wallet, clock, taskbar */
+function hkWallet(){
+  const g = ITEMS.reduce((a, it) => a + (num(S.qty[it.id]) || 0) * it.price, 0);
+  $("#hkWallet").textContent = fmt(g);
+  $("#hkWalletTro").textContent = "= " + fmt(g / (num(S.conv.g.ratio) > 0 ? num(S.conv.g.ratio) : 2)) + " Tro";
+}
+const hkTick = () => { const d = new Date(); $("#hkClock").textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
+hkTick(); setInterval(hkTick, 15000);
+document.querySelectorAll(".hk-apps button").forEach(b => b.onclick = () => {
+  const id = b.dataset.go;
+  if (id === "chat") { if ($("#chat").hidden) $("#chatFab").click(); else $("#chatClose").click(); return; }
+  const el = byId(id); if (!el) return;
+  if (el.classList.contains("collapsed")) { const cb = el.querySelector(".colbtn"); if (cb) cb.click(); }
+  el.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+  el.classList.remove("landed"); void el.offsetWidth; el.classList.add("landed");
+});
+document.addEventListener("input", hkWallet); document.addEventListener("click", () => setTimeout(hkWallet, 0)); setTimeout(hkWallet, 0);
 $("#skinBtn").onclick = () => { S.skin = S.skin === "graal" ? "hacked" : "graal"; save(); applySkin(); if (typeof relayout === "function") relayout(); };
 applySkin();
 
