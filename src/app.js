@@ -39,7 +39,7 @@ let S = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:fal
 const isNum = v => typeof v === "number" && Number.isFinite(v);
 const clampN = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 function cleanState(raw){
-  const out = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:false}}, log:[], theme:null, layout:null, layoutV:2, collapsed:{}, compact:false, skin:"hacked"};
+  const out = {qty:{}, conv:{g:{ratio:"2",reversed:false}, r:{ratio:"1.3",reversed:false}}, log:[], theme:null, layout:null, layoutV:2, collapsed:{}, compact:false};
   if (!raw || typeof raw !== "object") return out;
   const ids = new Set(ITEMS.map(i => i.id));
   if (raw.qty && typeof raw.qty === "object") for (const [k, v] of Object.entries(raw.qty)) {
@@ -68,7 +68,6 @@ function cleanState(raw){
     if (ok) out.layout = L;
   }
   if (raw.compact === true) out.compact = true;
-  if (raw.skin === "graal" || raw.skin === "hacked") out.skin = raw.skin;
   if (raw.collapsed && typeof raw.collapsed === "object") for (const id of ["winBag","convG","convR","winReceipt"]) if (raw.collapsed[id] === true) out.collapsed[id] = true;
   return out;
 }
@@ -107,33 +106,6 @@ $("#themeBtn").onclick = () => {
   S.theme = dark ? "light" : "dark"; save(); applyTheme();
 };
 applyTheme();
-function applySkin(){
-  const hacked = S.skin !== "graal";
-  document.documentElement.classList.toggle("hacked", hacked);
-  $("#skinLbl").textContent = hacked ? "Hacked" : "Graal";
-  $("#skinBtn").setAttribute("aria-pressed", hacked ? "true" : "false");
-  $("#themeBtn").hidden = hacked;
-  const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = hacked ? "#1A0B38" : "#219418";
-}
-/* hacked skin desktop bits: live wallet, clock, taskbar */
-function hkWallet(){
-  const g = ITEMS.reduce((a, it) => a + (num(S.qty[it.id]) || 0) * it.price, 0);
-  $("#hkWallet").textContent = fmt(g);
-  $("#hkWalletTro").textContent = "= " + fmt(g / (num(S.conv.g.ratio) > 0 ? num(S.conv.g.ratio) : 2)) + " Tro";
-}
-const hkTick = () => { const d = new Date(); $("#hkClock").textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); };
-hkTick(); setInterval(hkTick, 15000);
-document.querySelectorAll(".hk-apps button").forEach(b => b.onclick = () => {
-  const id = b.dataset.go;
-  if (id === "chat") { if ($("#chat").hidden) $("#chatFab").click(); else $("#chatClose").click(); return; }
-  const el = byId(id); if (!el) return;
-  if (el.classList.contains("collapsed")) { const cb = el.querySelector(".colbtn"); if (cb) cb.click(); }
-  el.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
-  el.classList.remove("landed"); void el.offsetWidth; el.classList.add("landed");
-});
-document.addEventListener("input", hkWallet); document.addEventListener("click", () => setTimeout(hkWallet, 0)); setTimeout(hkWallet, 0);
-$("#skinBtn").onclick = () => { S.skin = S.skin === "graal" ? "hacked" : "graal"; save(); applySkin(); if (typeof relayout === "function") relayout(); };
-applySkin();
 
 /* ---------- bag ---------- */
 function buildShelf(){
